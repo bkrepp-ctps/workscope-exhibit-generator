@@ -102,21 +102,21 @@
 # write_exhibit_2_final_boilerplate - writes boilerplate HTML at end of Exhibit 2
 #
 # write_exhibit_2_body - driver routine for producing HTML for the body of Exhibit 2;
-#                        calls  write_direct_salary_div, write_salary_cost_table_div,
-#                        write_other_direct_costs_div, write_total_direct_costs_div, 
-#                        and write_funding_div
+#                        calls  write_ex2_direct_salary_div, write_ex2_salary_cost_table_div,
+#                        write_ex2_other_direct_costs_div, write_ex2_total_direct_costs_div, 
+#                        and write_ex2_funding_div
 #
-# write_direct_salary_div - writes "one-line div" containing total direct salary and
+# write_ex2_direct_salary_div - writes "one-line div" containing total direct salary and
 #                           overhead cost
 #
-# write_other_direct_costs_div - writes "one-line div" containing total of other
+# write_ex2_other_direct_costs_div - writes "one-line div" containing total of other
 #                                direct costs
 #
-# write_total_direct_costs_div - writes "one-line div" containing total cost
+# write_ex2_total_direct_costs_div - writes "one-line div" containing total cost
 #
-# write_funding_div - writes div with list of funding source(s)
+# write_ex2_funding_div - writes div with list of funding source(s)
 #
-# write_salary_cost_table_div - writes the div containing the salary cost table;
+# write_ex2_salary_cost_table_div - writes the div containing the salary cost table;
 #                               calls write_task_tr. This is the driver routine
 #                               for most of the work done by this program.
 #
@@ -274,7 +274,6 @@ def format_dollars(dollars):
 # the workscope exhibit data.
 # 
 def initialize(fullpath):
-    print 'Entered initialize function; fullpath = ' + fullpath
     # retval dictionary
     retval = {}
     # Workbook MUST be opened with data_only parameter set to True.
@@ -439,6 +438,15 @@ def initialize(fullpath):
     return retval
 # end_def initialize()
 
+
+
+
+
+# Currently, this routine is just a stub.
+def write_exhibit_1(xlsInfo):
+    pass
+# end_def write_exhibit_1()
+
 # Write initial "boilerplate" HTML for Exhibit 2.
 # This includes all content from DOCTYPE, the <html> tag, and everything in the <head>.
 def write_exhibit_2_initial_boilerplate():
@@ -462,8 +470,7 @@ def write_exhibit_2_final_boilerplate():
     appendHTML(s)
 # end_def write_exhibit_2_final_boilerplate()
 
-
-def write_direct_salary_div(xlsInfo):
+def write_ex2_direct_salary_div(xlsInfo):
     s = '<div id="directSalaryDiv" class="barH2">'
     appendHTML(s)
     s = '<h2>Direct Salary and Overhead</h2>'
@@ -475,11 +482,11 @@ def write_direct_salary_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_direct_salary_div()
+# end_def write_ex2_direct_salary_div()
 
 ######################################################################################################
 # Helper function to generate <tr> (and its contents) for one task in the salary cost table.
-# This function is called only from write_salary_cost_table_div, which it is LOGICALLY nested within.
+# This function is called only from write_ex2_salary_cost_table_div, which it is LOGICALLY nested within.
 # In order to expedite development/prototyping, however, it is currently defined here at scope-0.
 # When the tool has become stable, move it within the def of salary_cost_table_div.
 #
@@ -569,7 +576,7 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
 ##################################################################
 # Top-level routine for generating HTML for salary cost table div.
 # Calls end_def write_task_tr as a helper function.
-def write_salary_cost_table_div(xlsInfo):
+def write_ex2_salary_cost_table_div(xlsInfo):
     s = '<div class="costTblDiv">'
     appendHTML(s)
     s = '<table id="ex2Tbl" summary="Breakdown of staff time by task in column one, expressed in person weeks for each implicated pay grade in the middle columns,'
@@ -747,9 +754,9 @@ def write_salary_cost_table_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_salary_cost_table_div()
+# end_def write_ex2_salary_cost_table_div()
 
-def write_other_direct_costs_div(xlsInfo):
+def write_ex2_other_direct_costs_div(xlsInfo):
     s = '<div id="otherDirectDiv" class="barH2">'
     appendHTML(s)
     s = '<h2>Other Direct Costs</h2>'
@@ -814,9 +821,9 @@ def write_other_direct_costs_div(xlsInfo):
     # </div> for wrapper
     s = '</div>'
     appendHTML(s)
-# end_def write_other_direct_costs_div()
+# end_def write_ex2_other_direct_costs_div()
 
-def write_total_direct_costs_div(xlsInfo):
+def write_ex2_total_direct_costs_div(xlsInfo):
     s = '<div id="totalDirectDiv" class="barH2">'
     appendHTML(s)
     s = '<h2>TOTAL COST</h2>'
@@ -828,9 +835,9 @@ def write_total_direct_costs_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_total_direct_costs_div()
+# end_def write_ex2_total_direct_costs_div()
 
-def write_funding_div(xlsInfo):
+def write_ex2_funding_div(xlsInfo):
     s = '<div id="fundingDiv">'
     appendHTML(s)
     s = '<div id="fundingHdrDiv">'
@@ -857,7 +864,7 @@ def write_funding_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_funding_div()
+# end_def write_ex2_funding_div()
 
 # This writes the HTML for the entire <body> of Exhibit 2, including:
 #   the opening <body> tag
@@ -885,17 +892,12 @@ def write_exhibit_2_body(xlsInfo):
     s = '</h1>'
     appendHTML(s)
     #
-    write_direct_salary_div(xlsInfo)
-    write_salary_cost_table_div(xlsInfo)
-    write_other_direct_costs_div(xlsInfo)
-    write_total_direct_costs_div(xlsInfo)
-    write_funding_div(xlsInfo)
+    write_ex2_direct_salary_div(xlsInfo)
+    write_ex2_salary_cost_table_div(xlsInfo)
+    write_ex2_other_direct_costs_div(xlsInfo)
+    write_ex2_total_direct_costs_div(xlsInfo)
+    write_ex2_funding_div(xlsInfo)
 # end_def write_exhibit_2_body()
-
-# Currently, this routine is just a stub.
-def write_exhibit_1(xlsInfo):
-    pass
-# end_def write_exhibit_1()
 
 def write_exhibit_2(xlsInfo):
     write_exhibit_2_initial_boilerplate()
@@ -907,6 +909,7 @@ def write_exhibit_2(xlsInfo):
 # Currently only generates HTML for Exhibit 2.
 # TBD: Generate HTML for Exhibit 1
 def main(fullpath):
+    global accumulatedHTML # Yeech
     t1 = os.path.split(fullpath)
     in_dir = t1[0]
     in_fn = t1[1]
@@ -1025,7 +1028,6 @@ class Frame(wx.Frame):
 
     def OnSelectFile(self, event):
         frame = wx.Frame(None, -1, 'win.py')
-        # frame.SetDimensions(0,0,200,50)
         frame.SetSize(0,0,200,50)
         openFileDialog = wx.FileDialog(frame, "Select workscope exhibit spreadsheet", "", "", 
                                        "Excel files (*.xlsx)|*.xlsx", 
@@ -1033,7 +1035,6 @@ class Frame(wx.Frame):
         openFileDialog.ShowModal()
         self.xlsxFileName = openFileDialog.GetPath()
         self.m_text.SetLabel("Selected .xlsx file: " + self.xlsxFileName)
-        # print "DEBUG: self.xlsxFileName is " + self.xlsxFileName
         openFileDialog.Destroy()
     # end_def OnSelectFile()
     
@@ -1044,8 +1045,13 @@ class Frame(wx.Frame):
         result = dlg.ShowModal()
         dlg.Destroy()
         if result == wx.ID_OK:
-            print "Full path to .xlsx file is: " + self.xlsxFileName
-            print "Next thing to do: call main()!"
+            main(self.xlsxFileName)
+            message = "HTML for workscope exhibits generated."
+            caption = "Work Scope Exhibit Tool"
+            dlg = wx.MessageDialog(None, message, caption, wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+            self.Destroy()
         else:
             self.Destroy()
     # end_def OnGenerate()
