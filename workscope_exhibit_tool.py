@@ -175,15 +175,44 @@ import openpyxl
 from bs4 import BeautifulSoup
 import wx
 
-# Var in which we accumulate all HTML generated.
+# Gross global var in which we accumulate all HTML generated.
 accumulatedHTML = ''
 
-# *** TBD: Come up with a better name for this fn!
-def blah(s):
+# Append string to gross globabl variable accumulatedHTML 
+def appendHTML(s):
 	global accumulatedHTML
-	print s
-	accumulatedHTML = accumulatedHTML + s
-# end_def blah()
+	# print s
+	accumulatedHTML += s
+# end_def appendHTML()
+
+######################################################################################
+# I would really like to manage the collection of HTML using the following function,
+# but have decided against this (at least for the time being) in order to make the
+# code easier to understand for people who are unfamiliar with closures in general 
+# (and closures in Python 2.x in particular) and functional programming.
+# If you know what you're doing, modifying the code to use "functional_output_manager" 
+# will be straightforward. I leave "functional_output_manager" here as a teaser for
+# those who might enjoy the opportunity to work with functional code. 
+# -- BK 7/27/2018
+def functional_output_manager():
+	my_vars = {}
+	my_vars['accumulatedHTML'] = ''
+	def append(s):
+		my_vars['accumulatedHTML'] += s
+	# end_def
+	def clear():
+		my_vars['accumulatedHTML'] = ''
+	# end_def
+	def get():
+		return my_vars['accumulatedHTML']
+	# end_def
+	retval = {}
+	retval['append'] = append
+	retval['clear'] = clear
+	retval['get'] = get
+	return retval
+# end_def output_manager()
+
 
 
 # Return the column index for a defined name assigned to A SINGLE CELL.
@@ -238,13 +267,13 @@ def format_dollars(dollars):
 	return retval
 # end_def format_dollars()
 
-
 # Open the workbook (.xlsx file) inidicated by the "fullpath" parameter.
 # Return a dictionary containing all row and column inidices of interest,
 # as well as entries for the workbook itself and the worksheet containing
 # the workscope exhibit data.
 # 
 def initialize(fullpath):
+	print 'Entered initialize function; fullpath = ' + fullpath
 	# retval dictionary
 	retval = {}
 	# Workbook MUST be opened with data_only parameter set to True.
@@ -413,40 +442,39 @@ def initialize(fullpath):
 # This includes all content from DOCTYPE, the <html> tag, and everything in the <head>.
 def write_exhibit_2_initial_boilerplate():
 	s = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-	blah(s)
+	appendHTML(s)
 	s = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-	blah(s)
+	appendHTML(s)
 	s = '<title>CTPS Work Scope Exhibit 2</title>'
-	blah(s)
+	appendHTML(s)
 	s = '<link rel="stylesheet" type="text/css" href="./ctps_work_scope_print.css">'
-	blah(s)
+	appendHTML(s)
 	s = '</head>'
-	blah(s)
+	appendHTML(s)
 # end_def write_exhibit_2_initial_boilerplate()
 
 # This writes the final "boilerplate" HTML for Exhibit 2: the closing </body> and </html> tags.
 def write_exhibit_2_final_boilerplate():
 	s = '</body>' 
-	blah(s)
+	appendHTML(s)
 	s = '</html>'
-	blah(s)
+	appendHTML(s)
 # end_def write_exhibit_2_final_boilerplate()
 
 
 def write_direct_salary_div(xlsInfo):
 	s = '<div id="directSalaryDiv" class="barH2">'
-	blah(s)
+	appendHTML(s)
 	s = '<h2>Direct Salary and Overhead</h2>'
-	blah(s)
+	appendHTML(s)
 	t1 = '<div class="h2AmtDiv">'
 	t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['direct_salary_cell_row_ix'], xlsInfo['direct_salary_cell_col_ix']))
 	t3 = '</div>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 # end_def write_direct_salary_div()
-
 
 ######################################################################################################
 # Helper function to generate <tr> (and its contents) for one task in the salary cost table.
@@ -460,7 +488,7 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
 	tr_id = 'taskHeader' + str(task_num)
 	t2 = tr_id + '>'
 	s = t1 + t2
-	blah(s)
+	appendHTML(s)
 	
 	# <td> for task number and task name
 	# Note: This contains 3 divs organized thus: <div> <div></div> <div></div> </div>
@@ -471,27 +499,27 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
 		t2 = 'class="taskTblCell">'
 	# end_if
 	s = t1 + t2 
-	blah(s)
+	appendHTML(s)
 	# Open outer div
 	s = '<div class="taskTblCellDiv">'
-	blah(s)
+	appendHTML(s)
 	# First inner div
 	t1 = '<div class="taskNumDiv">'
 	t2 = get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['task_number_col_ix'])
 	t3 = '</div>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	# Second inner div
 	t1 = '<div class="taskNameDiv">'
 	t2 = get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['task_name_col_ix'])
 	t3 = '</div>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	# Close outer div, and close <td>
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 	s = '</td>'
-	blah(s)
+	appendHTML(s)
 	
 	# Generate the <td>s for all the salary grades used in this work scope exhibit
 	for col_info in real_cols_info:
@@ -500,7 +528,7 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
 		t3 = format_person_weeks(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo[col_info['col_ix']]))
 		t4 = '</td>'
 		s = t1 + t2 + t3 + t4
-		blah(s)
+		appendHTML(s)
 	# end_for
 	
 	# Generate the <td>s for 'Total [person weeks]', 'Direct Salary', 'Overhead', and 'Total Cost'.
@@ -510,31 +538,31 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
 	t2 = format_person_weeks(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['total_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	#
 	# Direct Salary
 	t1 = '<td headers="' + tr_id + ' salaryTblHdr" class="rightPaddedTblCell">'
 	t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['direct_salary_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	#
 	# Overhead
 	t1 = '<td headers="' + tr_id + ' overheadTblHdr" class="rightPaddedTblCell">'
 	t2 = '$' +  format_dollars(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['overhead_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)		
+	appendHTML(s)		
 	#
 	# Total Cost
 	t1 = '<td headers="' + tr_id + ' totalTblHdr" class="rightPaddedTblCell">'
 	t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['total_cost_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)		
+	appendHTML(s)		
 	
 	s = '</tr>'
-	blah(s)
+	appendHTML(s)
 # end_def write_task_tr()
 
 ##################################################################
@@ -542,15 +570,15 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
 # Calls end_def write_task_tr as a helper function.
 def write_salary_cost_table_div(xlsInfo):
 	s = '<div class="costTblDiv">'
-	blah(s)
+	appendHTML(s)
 	s = '<table id="ex2Tbl" summary="Breakdown of staff time by task in column one, expressed in person weeks for each implicated pay grade in the middle columns,'
 	s = s + 'together with resulting total salary and associated overhead costs in the last columns.">'
-	blah(s)
+	appendHTML(s)
 	
 	# The table header (<thead>) element and its contents
 	#
 	s = '<thead>'
-	blah(s)
+	appendHTML(s)
 	
 	# <thead> contents
 	# Most of this is invariant bolierplate. The exceptions are the number of "real" columns and the overhead rate.
@@ -558,9 +586,9 @@ def write_salary_cost_table_div(xlsInfo):
 	# First row of <thead> contents
 	# 
 	s = '<tr>'
-	blah(s)
+	appendHTML(s)
 	s = '<th id="taskTblHdr" class="colTblHdr" rowspan="2" scope="col"><br>Task</th>'
-	blah(s)
+	appendHTML(s)
 	# 
 	# Get actual number of columns to use for "colspan".
 	# Determine which columns contain non-zero data: it's sufficent to check the total row for this.
@@ -600,24 +628,24 @@ def write_salary_cost_table_div(xlsInfo):
 	t2 = n_real_cols
 	t3 = '" abbr="Person Weeks" scope="colgroup">Person-Weeks</th>'
 	s = t1 + str(t2) + t3
-	blah(s)
+	appendHTML(s)
 	s = '<th id="salaryTblHdr" class="colTblHdr" rowspan="2" scope="col" abbr="Direct Salary">Direct<br>Salary</th>'
-	blah(s)
+	appendHTML(s)
 	t1 = '<th id="overheadTblHdr" class="colTblHdr" rowspan="2" scope="col" abbr="Overhead">Overhead<br>'
 	t2 = get_cell_contents(xlsInfo['ws'], xlsInfo['overhead_cell_row_ix'], xlsInfo['overhead_cell_col_ix'])
 	t2 = t2.replace('@ ', '')
 	t3 = '</th>'
 	s = t1 + t2 + t3 
-	blah(s)
+	appendHTML(s)
 	s = '<th id="totalTblHdr" class="colTblHdr" rowspan="2" scope="col" abbr="Total Cost">Total<br>Cost</th>'
-	blah(s)
+	appendHTML(s)
 	s = '</tr>'
-	blah(s)
+	appendHTML(s)
 	
 	# Second row of <thead> contents
 	#
 	s = '<tr>'
-	blah(s)
+	appendHTML(s)
 	# Column headers for all columns for job classifications used in this work scope
 	#
 	for col_info in real_cols_info:
@@ -629,22 +657,22 @@ def write_salary_cost_table_div(xlsInfo):
 		t6 = col_info['col_header_with_dash']
 		t7 = '</th>'
 		s = t1 + t2 + t3 + t4 + t5 + t6 + t7
-		blah(s)
+		appendHTML(s)
 	# end_for
 	# Second: column header for Total column
 	s = '<th id="personWeekTotalTblHdr" scope="col">Total</th>'
-	blah(s)
+	appendHTML(s)
 	s = '</tr>'
-	blah(s)
+	appendHTML(s)
 	
 	# Close <thead> 
 	s = '</thead>'
-	blah(s)	
+	appendHTML(s)	
 	
 	# The table body <tbody> element and its contents.
 	#
 	s = '<tbody>'
-	blah(s)
+	appendHTML(s)
 	
 	# <tbody> contents.
 	#
@@ -658,21 +686,21 @@ def write_salary_cost_table_div(xlsInfo):
 	# The 'Total' row
 	#
 	s = '<tr>'
-	blah(s)
+	appendHTML(s)
 	s = '<td headers="taskTblHdr" id="totalRowTblHdr" class="taskTblCell" scope="row" abbr="Total All Tasks">'
-	blah(s)
+	appendHTML(s)
 	s = '<div class="taskTblCellDiv">'
-	blah(s)
+	appendHTML(s)
 	# Total row, task number column (empty)
 	s = '<div class="taskNumDiv"> </div>'
-	blah(s)
+	appendHTML(s)
 	# Total row, "task name" colum - which contains the pseudo task name 'Total'
 	s = '<div class="taskNameDiv">Total</div>'
-	blah(s)
+	appendHTML(s)
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 	s = '</td>'
-	blah(s)
+	appendHTML(s)
 	
 	# Total row: columns for salary grades used in this workscope
 	for col_info in real_cols_info:
@@ -680,7 +708,7 @@ def write_salary_cost_table_div(xlsInfo):
 		t2 = format_person_weeks(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo[col_info['col_ix']]))
 		t3 = '</td>'
 		s = t1 + t2 + t3
-		blah(s)
+		appendHTML(s)
 	# end_for
 	
 	# Total row: Total [person weeks] column
@@ -688,68 +716,67 @@ def write_salary_cost_table_div(xlsInfo):
 	t2 = format_person_weeks(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['total_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	# Total row, direct salary column
 	t1 = '<td id="directSalaryTotalRowTblCell" headers="totalRowTblHdr salaryTblHdr" class="totalRowTblCell">'
 	t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['direct_salary_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	# Total row, overhead column
 	t1 = '<td id="overheadTotalRowTblCell" headers="totalRowTblHdr overheadTblHdr" class="totalRowTblCell">'
 	t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['overhead_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	# Total row, total cost column
 	t1 = '<td id="totalTotalRowTblCell" headers="totalRowTblHdr totalTblHdr" class="totalRowTblCell">'
 	t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['total_cost_col_ix']))
 	t3 = '</td>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	# Close <tr> for Total row
 	s = '</tr>'
-	blah(s)
+	appendHTML(s)
 	
 	# Close <tbody>, <table>, and <div>
 	s = '</tbody>'
-	blah(s)
+	appendHTML(s)
 	s = '</table>'
-	blah(s)
+	appendHTML(s)
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 # end_def write_salary_cost_table_div()
-
 
 def write_other_direct_costs_div(xlsInfo):
 	s = '<div id="otherDirectDiv" class="barH2">'
-	blah(s)
+	appendHTML(s)
 	s = '<h2>Other Direct Costs</h2>'
-	blah(s)
+	appendHTML(s)
 	t1 = '<div class="h2AmtDiv">'
 	odc_total = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_cell_row_ix'], xlsInfo['odc_cell_col_ix'])
 	t2 = '$' + format_dollars(odc_total)
 	t3 = '</div>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 	# Write the divs for the specific other direct costs and a wrapper div around all of them (even if there are none.)
 	#
 	# <div> for wrapper
 	s = '<div class="costTblDiv">'
-	blah(s)
+	appendHTML(s)
 	
 	# Utiltiy function to write HTML for one kind of 'other direct cost.'
 	def write_odc(name, cost):
 		s = '<div class="otherExpDiv">'
-		blah(s)
+		appendHTML(s)
 		s = '<div class="otherExpDescDiv">' + name + '</div>'
-		blah(s)
+		appendHTML(s)
 		s = '<div class="otherExpAmtDiv">' + '$' + format_dollars(cost) + '</div>'
-		blah(s)
+		appendHTML(s)
 		s = '</div>'
-		blah(s)
+		appendHTML(s)
 	# end_def write_odc()
 	
 	# Travel
@@ -785,34 +812,34 @@ def write_other_direct_costs_div(xlsInfo):
 	
 	# </div> for wrapper
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 # end_def write_other_direct_costs_div()
 
 def write_total_direct_costs_div(xlsInfo):
 	s = '<div id="totalDirectDiv" class="barH2">'
-	blah(s)
+	appendHTML(s)
 	s = '<h2>TOTAL COST</h2>'
-	blah(s)
+	appendHTML(s)
 	t1 = '<div class="h2AmtDiv">'
 	t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_cost_cell_row_ix'], xlsInfo['total_cost_cell_col_ix']))
 	t3 = '</div>'
 	s = t1 + t2 + t3
-	blah(s)
+	appendHTML(s)
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 # end_def write_total_direct_costs_div()
 
 def write_funding_div(xlsInfo):
 	s = '<div id="fundingDiv">'
-	blah(s)
+	appendHTML(s)
 	s = '<div id="fundingHdrDiv">'
-	blah(s)
+	appendHTML(s)
 	s = 'Funding'
-	blah(s)
+	appendHTML(s)
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 	s =	'<div id="fundingListDiv">'
-	blah(s)
+	appendHTML(s)
 	#
 	kount = 0
 	for fs_row in range(xlsInfo['funding_list_top_row_ix']+1,xlsInfo['funding_list_bottom_row_ix']):
@@ -823,12 +850,12 @@ def write_funding_div(xlsInfo):
 			s = s + '<br>'
 		# end_if
 		s = s + get_cell_contents(xlsInfo['ws'], fs_row, xlsInfo['task_name_col_ix'])
-		blah(s)
+		appendHTML(s)
 	# end_for		
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 	s = '</div>'
-	blah(s)
+	appendHTML(s)
 # end_def write_funding_div()
 
 # This writes the HTML for the entire <body> of Exhibit 2, including:
@@ -840,22 +867,22 @@ def write_funding_div(xlsInfo):
 #	the div for funding source(s)
 def write_exhibit_2_body(xlsInfo):
 	s = '<body style="text-align:center;margin:0pt;padding:0pt;">'
-	blah(s)
+	appendHTML(s)
 	s = '<div id="exhibit2">'
-	blah(s)
+	appendHTML(s)
 	s = '<div class="exhibitPageLayoutDiv1"><div class="exhibitPageLayoutDiv2">'
-	blah(s)
+	appendHTML(s)
 	s = '<h1>'
-	blah(s)
+	appendHTML(s)
 	s = 'Exhibit 2<br>'
-	blah(s)
+	appendHTML(s)
 	s = 'ESTIMATED COST<br>'
-	blah(s)
+	appendHTML(s)
 	s = str(get_cell_contents(xlsInfo['ws'], xlsInfo['project_name_cell_row_ix'], xlsInfo['project_name_cell_col_ix']))
 	s = s + '<br>'
-	blah(s)
+	appendHTML(s)
 	s = '</h1>'
-	blah(s)
+	appendHTML(s)
 	#
 	write_direct_salary_div(xlsInfo)
 	write_salary_cost_table_div(xlsInfo)
@@ -877,48 +904,94 @@ def write_exhibit_2(xlsInfo):
 #	2. Generate PDF for Exhibit 1
 #	3. Generate PDF for Exhibit 2
 def main():
-	app = wx.App()
-	frame = wx.Frame(None, -1, 'win.py')
-	# In previous versions of wxPython, the following line would have been written: "frame.SetDimensions(0,0,200,500)
-	frame.DoSetSize(0,0,200,500, wx.SIZE_AUTO)
-	# Create open file dialog
-	openFileDialog = wx.FileDialog(frame, "Select workscope exhibit spreadsheet", "", "", 
-										  "Excel files (*.xlsx)|*.xlsx", 
-										   wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
-	openFileDialog.ShowModal()
-	fullpath = openFileDialog.GetPath()
-	openFileDialog.Destroy()
-	
-	t1 = os.path.split(fullpath)
-	in_dir = t1[0]
-	in_fn = t1[1]
-	in_fn_wo_suffix = os.path.splitext(in_fn)[0]
-	
-	ex_1_out_html_fn = in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_1.html'
-	ex_1_out_pdf_fn =  in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_1.pdf'
-	ex_2_out_html_fn = in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_2.html'
-	ex_2_out_pdf_fn =  in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_2.pdf'
-	
-	# Collect 'navigation' information from input .xlsx file
-	xlsInfo = initialize(fullpath)
-	
-	# TBD: Generate exhibit 1 HTML
-	pass
-	
-	# TBD: Generate exhbit 1 PDF
-	pass
-	
-	# Generate Exhibit 2 HTML
-	write_exhibit_2(xlsInfo)
-	soup = BeautifulSoup(accumulatedHTML, 'html.parser')
-	ex_2_html = soup.prettify() + '\n'
-	o = open(ex_2_out_html_fn, 'w')
-	# NOTE: We need to encode the output as UTF-8 because it may contain non-ASCII characters,
-	# e.g., the  "section" symbol used to identify funding sources such as <section>5303 ..
-	o.write(ex_2_html.encode("UTF-8"))
-	o.close()
-	
-	# TBD: Generate exhibit 2 PDF
-	pass
 
+	# On-click handler for button to launch file select dialog
+	def onButton1(event):
+		global app, gfullpath
+		global main_panel
+		
+		# print "Button1 handler entered."
+		ofd_frame = wx.Frame(None, -1, 'win.py', size=(500,200))
+		# In previous versions of wxPython, the following line would have been written: "frame.SetDimensions(0,0,200,500)
+		# frame.DoSetSize(0,0,200,500, wx.SIZE_AUTO)
+		# Create open file dialog
+		openFileDialog = wx.FileDialog(ofd_frame, "Select workscope exhibit spreadsheet", "", "", 
+											  "Excel files (*.xlsx)|*.xlsx", 
+											   wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+		openFileDialog.ShowModal()
+		gfullpath = openFileDialog.GetPath()
+		print 'gfullpath is: ' + gfullpath
+		
+		txt = wx.StaticText(panel, wx.ID_ANY, label='Selected: ' + gfullpath, pos=(10,50))
+		openFileDialog.Destroy()
+	# end_def onButton1()
+	
+	# On-click handler for button to initiate HTML generation
+	def onButton2(event):
+		global gfullpath
+		print "Button 2 handler entered."
+		
+		t1 = os.path.split(gfullpath)
+		in_dir = t1[0]
+		in_fn = t1[1]
+		in_fn_wo_suffix = os.path.splitext(in_fn)[0]
+		ex_1_out_html_fn = in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_1.html'
+		ex_1_out_pdf_fn =  in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_1.pdf'
+		ex_2_out_html_fn = in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_2.html'
+		ex_2_out_pdf_fn =  in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_2.pdf'
+		
+		# Collect 'navigation' information from input .xlsx file
+		xlsInfo = initialize(gfullpath)
+		
+		# TBD: Generate exhibit 1 HTML
+		pass
+		
+		# TBD: Generate exhbit 1 PDF
+		pass
+		
+		# Generate Exhibit 2 HTML
+		write_exhibit_2(xlsInfo)
+		soup = BeautifulSoup(accumulatedHTML, 'html.parser')
+		ex_2_html = soup.prettify() + '\n'
+		o = open(ex_2_out_html_fn, 'w')
+		# NOTE: We need to encode the output as UTF-8 because it may contain non-ASCII characters,
+		# e.g., the "section" symbol used to identify funding sources such as <section>5303 ..
+		o.write(ex_2_html.encode("UTF-8"))
+		o.close()
+		
+		# TBD: Generate exhibit 2 PDF
+		pass		
+		
+		# Create alert box - notify user that processing has completed
+		message = "Exhibit 2 HTML is in:\n" + ex_2_out_html_fn
+		caption = "Work Scope Exhibit Tool"
+		dlg = wx.MessageDialog(None, message, caption, wx.OK | wx.ICON_INFORMATION)
+		dlg.ShowModal()
+		dlg.Destroy()		
+	# end_def onButton2()
+	
+	def closeFrameHandler(event):
+		global main_frame
+		main_frame.Destroy()
+	# end closeFrameHanlder()
+	
+	# Execution of 'main' starts here.	
+	app = wx.App()
+	gfullpath = ''
+	
+	main_frame = wx.Frame(None, -1, "Workscope Exhibit Tool", size=(500,200))
+	# main_frame.Bind(wx.EVT_CLOSE, closeFrameHandler)
+	
+	panel = wx.Panel(main_frame, wx.ID_ANY, name="my_panel")
+	
+	b1 = wx.Button(panel, wx.ID_ANY, label='Select workscope exhibit spreadsheet', pos=(10,10))
+	b1.Bind(wx.EVT_BUTTON, onButton1)
+
+	# txt = wx.StaticText(panel, wx.ID_ANY, label='this is my text', pos=(150,150))
+
+	b2 = wx.Button(panel, wx.ID_ANY, label='Button 2', pos=(10,90))
+	b2.Bind(wx.EVT_BUTTON, onButton2) 
+	
+	main_frame.Show()
+	app.MainLoop()
 # end_def main()
