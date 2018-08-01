@@ -7,7 +7,7 @@
 #       <Python_installation_folder>/python.exe -m pip install wxPython
 #
 # Author: Benjamin Krepp
-# Date: 31 August 2018
+# Date: 1 August 2018
 #
 
 import wx, wx.html
