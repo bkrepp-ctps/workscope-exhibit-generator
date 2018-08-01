@@ -1,22 +1,174 @@
 # Prototype Python script to generate workscope exhibits
 #
-# This script relies upon the workscope exhibit template .xlsx file having been created with
-# 'defined_names' for various locations of interest in the spreadsheet.
-# For the most part, these defined names apply to CELLS not to RANGES of cells, and are used
-# extract row- or column-indices of interest.
-#
 # NOTES: 
 #	1. This script was written to run under Python 2.7.x
-#	2. This script relies upon the OpenPyXl and Beautiful Soup (version 4) libraries being installed.
-#	3. To install OpenPyXl and Beautiful Soup (version 4) under Python 2.7.x:
+#	2. This script relies upon the OpenPyXl, Beautiful Soup (version 4),
+#      and wxPython libraries being installed
+# 		OpenPyXl is used to read and navigate the input .xlsx workbook
+#       BeautifulSoup is used to 'pretty print' (i.e, format) the gerated HTML
+#       wxPython is used for the GUI
+#	3. To install OpenPyXl, Beautiful Soup (version 4), and wxPython under Python 2.7.x:
 #     	<Python_installation_folder>/python.exe -m pip install openpyxl
 #     	<Python_installation_folder>/python.exe -m pip install beautifulsoup4
+#		<Python_installation_folder>/python.exe -m pip install wxPython
 #
 # Author: Benjamin Krepp
-# Date: 23-25 July 2018
+# Date: 23-27 July 2018
+#
+# Requirements on the input .xlsx spreadsheet
+# ===========================================
+#
+# This script relies upon the workscope exhibit template .xlsx file having been created
+# with 'defined_names' for various locations of interest in it.
+# Although 'defined names' are often used to specify ranges of cells, here they are used
+# to identify specific cells, whose row and/or column index is obtained for use in the
+# generation of the HTML for a workscope exhibit.
+#
+# 1. The worksheet containing the workscope exhibits MUST be named 'workscope_exhibits'.
+#    Other worksheets may be present; their contents are ignored by this script.
+#
+# 2. These defined names MUST be present in the workbook and defined as follows:
+#
+#	project_name_cell - cell containing the project's name
+#	direct_salary_cell - cell containing the total direct salary and overhead
+#   odc_cell - cell containing the total of other direct costs
+#   total_cost_cell - cell containing the total cost of the project
+#   task_list_top - any cell in line immediately preceeding list of tasks;
+#                   only the row index of this cell is used
+#   task_list_bottom - any cell in line immediately following list of tasks;
+#                      only the row index of this cell is used
+#   funding list_top - any cell in line immediately preceeding list of funding
+#                      sources; only the row index of this cell is used
+#   funding list_bottom - any cell in line immediately following list of funding
+#                         sources; only the row index of this cell is used
+#   task_number_column - any cell in column containing the task numbers in
+#                        the cost table; only the column index of this cell is used
+#   task_name_column - any cell in column containint the task name in the 
+#                      cost table; only the column index of this cell is used
+#   m1_column -    cost table header cell containing the text 'M-1'
+#   p5_column -    cost table header cell containing the text 'P-5'
+#   p4_column -    cost table header cell containing the text 'P-4' 
+#   p3_column -    cost table header cell containing the text 'P-3'
+#   p2_column -    cost table header cell containing the text 'P-2'
+#   p1_column -    cost table header cell containing the text 'P-1'
+#   sp3_column -   cost table header cell containing the text 'SP-3'
+#   sp1_column -   cost table header cell containing the text 'SP-1'
+#   temp_column -  cost table header cell containing the text 'Temp'
+#   total_column - cost table header cell containing the text 'Total'
+#	direct_salary_column - cost table header cell containg the string
+#                          'Salary' (2nd line of 'Direct Salary')
+#	overhead_column - cost table header cell containing the overhead
+#                     rate (as a string); used when we want to access the column
+#   overhead_cell -   ditto; used when we want to access the cell itself
+#   total_cost_column - cost table header cell containing the text
+#                       'Cost' (2nd line of 'Total Cost'
+#	total_line - any cell in row containing person-hour totals in 
+#                the cost table; only the row index of this cell is used
+#   odc_travel_line - any cell on line containing Other Direct Costs: travel;
+#                     only the row index of this cell is used
+#	odc_office_equipment_line - any cell on line containing Other Direct Costs:
+#                               general office equipment; only the row index of 
+#                               this cell is used
+#   odc_dp_equipment_line - any cell on line containing Other Direct Costs:
+#						    data processing equipment; only the row index of 
+#                           this cell is used
+# 	odc_consultants_line - any cell on line containing Other Direct Costs:
+#						   consultants; only the row index of this cell is used
+#	odc_printing_line -	any cell on line containing Other Direct Costs:
+#                       printing; only the row index of this cell is used
+# 	odc_other_line - any cell on line containing Ohter Direct Costs: other;
+#					 only the row index of this cell is used
+#	
+# 
+# Internals of this Script: Top-level Functions
+# =============================================
+#
+# initialize - Reads a completed .xlsx workscope exhibit template; extracts the row-
+#              and colum-indices (and a couple of other things) of interest/use, 
+#              which are stored in a dictionary object. This object is subsequently
+#              used throughout the rest of this script to extract data from cells
+#              of interest in the spreadsheet. It is the most important data structure
+#              in this program.
+#
+# write_exhibit_2 - driver routine for generating Exhibit 2;
+#                   calls write_exhibit_2_initial_boilerplate,
+#               	write_exhibit_2_body, and write_exhibit_2_final_boilerplate
+#
+# write_exhibit_2_initial_boilerplate - writes boilerplate HTML at beginning of
+#                                       Exhibit 2
+#
+# write_exhibit_2_final_boilerplate - writes boilerplate HTML at end of Exhibit 2
+#
+# write_exhibit_2_body - driver routine for producing HTML for the body of Exhibit 2;
+#                        calls 	write_direct_salary_div, write_salary_cost_table_div,
+#                        write_other_direct_costs_div, write_total_direct_costs_div, 
+#                        and write_funding_div
+#
+# write_direct_salary_div - writes "one-line div" containing total direct salary and
+#                           overhead cost
+#
+# write_other_direct_costs_div - writes "one-line div" containing total of other
+#                                direct costs
+#
+# write_total_direct_costs_div - writes "one-line div" containing total cost
+#
+# write_funding_div - writes div with list of funding source(s)
+#
+# write_salary_cost_table_div - writes the div containing the salary cost table;
+#                               calls write_task_tr. This is the driver routine
+#                               for most of the work done by this program.
+#
+# write_task_tr - writes row for a given task in the work scope
+#
+# Internals of this Script: Utility Functions
+# ===========================================
+#
+# get_column_index - return the column index for a defined name assigned to a single cell
+#
+# get_row_index - return the row index for a defined name assigned to a single cell
+#
+# get_cell_contents - returns the contents of a cell, given a worksheet name, row index,
+#                     and column index
+#
+# format_person_weeks - formats a value indicating a quantity of person weeks (a float)
+#                       as a string one decimal place of precision
+#
+# format_dollars - formats a value indicating a quantity of dollars (a float) as a
+#                  string with zero decimal places of precision (i.e., an integer),
+#                  using the ',' symbol as the thousands delimeter
+#
+#
+# 'Ultra-quck Quick Start Guide to Using the OpenPyXl Library
+# ============================================================
+#
+# Open an .xlsx workbook:
+#	wb = openpyxl.load_workbook(full_path_to_workbook_file, data_only=True)
+#
+# Get list of worksheets in workbook:
+#	ws_list = wb.sheetnames
+#
+# Get a named worksheet:
+#	ws = wb['workscope_template']
+#
+# Get list of defined names in workbook:
+# 	list_of_dns = wb.defined_names
+#
+# Get value of a defined name, e.g., 'foobar'
+# 	dn_val = wb.defined_names['foobar'].value
+#
+# Get the worksheet and cell indices for a defined name,
+# and get the value of the cell it refers to
+#	temp = dn.split('!')
+#   # temp[0] is the worksheet name; temp[1] is the cell reference
+#   cell = ws[temp[1]]
+#	row_index = cell.row
+#	column_index = cell.col_idx
+# 	cell_value = ws.cell(row_index,column_index).value
 
+import os
 import openpyxl
 from bs4 import BeautifulSoup
+import wx
 
 # Var in which we accumulate all HTML generated.
 accumulatedHTML = ''
@@ -439,7 +591,6 @@ def write_salary_cost_table_div(xlsInfo):
 		real_cols_info.append(info)
 	# end_for
 		
-	
 	t1 = '<th id="personWeekTblHdr" class="colTblHdr" colspan="'
 	t2 = n_real_cols
 	t3 = '" abbr="Person Weeks" scope="colgroup">Person-Weeks</th>'
@@ -713,3 +864,56 @@ def write_exhibit_2(xlsInfo):
 	write_exhibit_2_body(xlsInfo)
 	write_exhibit_2_final_boilerplate()
 # end_def write_exhibit_2()
+
+# Main driver routine.
+# Currently only generates HTML for Exhibit 2.
+# TBD:
+#	1. Generate HTML for Exhibit 1
+#	2. Generate PDF for Exhibit 1
+#	3. Generate PDF for Exhibit 2
+def main():
+	app = wx.App()
+	frame = wx.Frame(None, -1, 'win.py')
+	# In previous versions of wxPython, the following line would have been written: "frame.SetDimensions(0,0,200,500)
+	frame.DoSetSize(0,0,200,500, wx.SIZE_AUTO)
+	# Create open file dialog
+	openFileDialog = wx.FileDialog(frame, "Select workscope exhibit spreadsheet", "", "", 
+										  "Excel files (*.xlsx)|*.xlsx", 
+										   wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+	openFileDialog.ShowModal()
+	fullpath = openFileDialog.GetPath()
+	openFileDialog.Destroy()
+	
+	t1 = os.path.split(fullpath)
+	in_dir = t1[0]
+	in_fn = t1[1]
+	in_fn_wo_suffix = os.path.splitext(in_fn)[0]
+	
+	ex_1_out_html_fn = in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_1.html'
+	ex_1_out_pdf_fn =  in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_1.pdf'
+	ex_2_out_html_fn = in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_2.html'
+	ex_2_out_pdf_fn =  in_dir + '\\' + in_fn_wo_suffix + '_Exhibit_2.pdf'
+	
+	# Collect 'navigation' information from input .xlsx file
+	xlsInfo = initialize(fullpath)
+	
+	# TBD: Generate exhibit 1 HTML
+	pass
+	
+	# TBD: Generate exhbit 1 PDF
+	pass
+	
+	# Generate Exhibit 2 HTML
+	write_exhibit_2(xlsInfo)
+	soup = BeautifulSoup(accumulatedHTML, 'html.parser')
+	ex_2_html = soup.prettify() + '\n'
+	o = open(ex_2_out_html_fn, 'w')
+	# NOTE: We need to encode the output as UTF-8 because it may contain non-ASCII characters,
+	# e.g., the  "section" symbol used to identify funding sources such as <section>5303 ..
+	o.write(ex_2_html.encode("UTF-8"))
+	o.close()
+	
+	# TBD: Generate exhibit 2 PDF
+	pass
+
+# end_def main()
