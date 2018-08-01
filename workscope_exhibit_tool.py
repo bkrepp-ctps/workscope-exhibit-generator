@@ -992,20 +992,22 @@ class Frame(wx.Frame):
 
         panel = wx.Panel(self)
         box = wx.BoxSizer(wx.VERTICAL)
-        
-        # Placeholder for name of selected .xlsx file; it is populated in OnSelectFile().
-        self.m_text = wx.StaticText(panel, -1, " ")
-        self.m_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
-        self.m_text.SetSize(self.m_text.GetBestSize())
-        box.Add(self.m_text, 0, wx.ALL, 10)
-        
+        box.AddSpacer(20)
+              
         m_select_file = wx.Button(panel, wx.ID_ANY, "Select Excel workbook")
         m_select_file.Bind(wx.EVT_BUTTON, self.OnSelectFile)
-        box.Add(m_select_file, 0, wx.ALL, 10)
+        box.Add(m_select_file, 0, wx.CENTER)
+        box.AddSpacer(20)
         
         m_generate = wx.Button(panel, wx.ID_ANY, "Generate HTML for Exhibits")
         m_generate.Bind(wx.EVT_BUTTON, self.OnGenerate)
-        box.Add(m_generate, 0, wx.ALL, 10)
+        box.Add(m_generate, 0, wx.CENTER)
+ 
+        # Placeholder for name of selected .xlsx file; it is populated in OnSelectFile(). 
+        self.m_text = wx.StaticText(panel, -1, " ")
+        self.m_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
+        self.m_text.SetSize(self.m_text.GetBestSize())
+        box.Add(self.m_text, 0, wx.ALL, 10)      
         
         panel.SetSizer(box)
         panel.Layout()
