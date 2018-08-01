@@ -12,7 +12,7 @@
 #     	<Python_installation_folder>/python.exe -m pip install beautifulsoup4
 #		<Python_installation_folder>/python.exe -m pip install wxPython
 #
-# Author: Benjamin Krepp
+# Author: B. Krepp
 # Date: 23-27 July 2018
 #
 # Requirements on the input .xlsx spreadsheet
@@ -83,6 +83,8 @@
 # Internals of this Script: Top-level Functions
 # =============================================
 #
+# main - main driver routine for this program
+#
 # initialize - Reads a completed .xlsx workscope exhibit template; extracts the row-
 #              and colum-indices (and a couple of other things) of interest/use, 
 #              which are stored in a dictionary object. This object is subsequently
@@ -137,9 +139,10 @@
 #                  string with zero decimal places of precision (i.e., an integer),
 #                  using the ',' symbol as the thousands delimeter
 #
-#
-# 'Ultra-quck Quick Start Guide to Using the OpenPyXl Library
-# ============================================================
+# 
+# A Guide for the Perplexed (with apologies to Maimonides):
+# An 'Ultra-quck' Quick Start Guide to Using the OpenPyXl Library
+# ===============================================================
 #
 # Open an .xlsx workbook:
 #	wb = openpyxl.load_workbook(full_path_to_workbook_file, data_only=True)
@@ -164,6 +167,8 @@
 #	row_index = cell.row
 #	column_index = cell.col_idx
 # 	cell_value = ws.cell(row_index,column_index).value
+#
+###############################################################################
 
 import os
 import openpyxl
