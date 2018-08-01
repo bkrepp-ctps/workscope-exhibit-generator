@@ -12,8 +12,8 @@
 #       <Python_installation_folder>/python.exe -m pip install beautifulsoup4
 #       <Python_installation_folder>/python.exe -m pip install wxPython
 #
-# Author: Benjamin Krepp
-# Date: 23-27 July 2018
+# Author: Benjmin Krepp
+# Date: 23-31 July 2018
 #
 # Requirements on the input .xlsx spreadsheet
 # ===========================================
@@ -439,12 +439,129 @@ def initialize(fullpath):
 # end_def initialize()
 
 
+# The following routine is under development
+def write_ex1_schedule_table(xlsInfo):
+    s = '<table id="ex1Tbl"'
+    s += 'summary="Breakdown of schedule by tasks in column one and calendar time ranges and deliverable dates in column two.">'
+    appendHTML(s)
+    
+    s = '<thead>'
+    # First row of column header, first column: 'Task'
+    appendHTML(s)
+    s = '<tr>'
+    appendHTML(s)
+    s = '<th id="ex1taskTblHdr" class="colTblHdr" rowspan="2"><br>Task</th>'
+    appendHTML(s)
+    
+    # First row of column header, second column: time unit used in table: 'Day' | 'Week' | 'Month'
+    #
+    # Values of the 2 following vars are placeholders!
+    colspan = 23 
+    time_unit  = 'Week'
+    t1 = '<th id="ex1weekTblHeader" class="colTblHdr"'
+    t2 = 'colspan="' + colspan + '">' + time_unit + '</th>'
+    s = t1 + t2 
+    appendHTML(s)
+    s = '</tr>'
+    appendHTML(s)
+    
+    # Second row of column header: numbers of individual time units in schedule
+    s = '<tr>'
+    appendHTML(s)
+    
+    # *** TBD: Here generate the <th>s for the second row of column headers
+    
+    
+    s = '</tr>'
+    appendHTML(s)
+    # Close table header
+	s = '</thead>'
+    appendHTML(s)
+    
+    # Call subordinate routine to do the heavy lifting: generate Exhibit 2 table body
+    write_ex1_schedule_table_body(xlsInfo)
+    
+# end_def write_ex1_schedule_table()
 
 
+# The following routine is under development
+def write_ex1_milestone_div(xlsInfo):
+    s = '<div id="milestoneDiv">'
+    appendHTML(s)
+    s = '<div id="milestoneHdrDiv">'
+    appendHTML(s)
+    s = 'Products/Milestones'
+    appendHTML(s)
+    s = '</div>'
+    appendHTML(s)
+    s = '<div id="milestoneListDiv">'
+    appendHMTL(s)
+    # The general form of the 'list' (but it's not an HTML <list>) of deliverables is:
+    #   <span class="label"> LETTER_CODE_FOR_DELIVERABLE </span> NAME_OF_DELIVERABLE <br>
+    # Example:
+    #   <span class="label"> A: </span> Memo to MPO with initial findings <br>
+    
+    s = '</div>'
+    appendHTML(s)
+    s = '</div>'
+    appendHTML(s)
+# end_def write_ex1_milestone_div()
 
-# Currently, this routine is just a stub.
-def write_exhibit_1(xlsInfo):
+
+def write_exhibit_1_body(xlsInfo):
     pass
+    s = '<body style="text-align:center;padding:0pt;margin:0pt;">'
+    appendHTML(s)
+    s = '<div id="exhibit1">'
+    appendHTML(s)
+    s = 'class="exhibitPageLayoutDiv1"><div class="exhibitPageLayoutDiv2">'
+    appendHTML(s)
+    s = '<h1>'
+    appendHTML(s)
+    s = 'Exhibit 1<br>'
+    appendHTML(s)
+    s = 'ESTIMATED SCHEDULE<br>'
+    appendHTML(s)
+    # Project name
+    s = str(get_cell_contents(xlsInfo['ws'], xlsInfo['project_name_cell_row_ix'], xlsInfo['project_name_cell_col_ix']))
+    s = s + '<br>'
+    appendHTML(s)
+    s = '</h1>'
+    appendHTML(s)
+    #
+    write_ex1_schedule_table(xlsInfo)
+    write_ex1_milestone_div(xlsInfo)
+# end_def 
+
+# TBD: Combine this and write_exhibit_2_body into a single, parameterized,  routine.
+def write_exhibit_1_initial_boilerplate():
+     s = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
+    appendHTML(s)
+    s = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
+    appendHTML(s)
+    s = '<title>CTPS Work Scope Exhibit 1</title>'
+    appendHTML(s)
+    s = '<link rel="stylesheet" type="text/css" href="./ctps_work_scope_print.css">'
+    appendHTML(s)
+    s = '</head>'
+    appendHTML(s)
+# end_def write_exhibit_1_initial_boilerplate()
+
+# Shares 100% code with write_exhibit_1_final_boilerplate. 
+# TBD: Combine these two routines.
+# Write the final "boilerplate" HTML for Exhibit 1: the closing </body> and </html> tags.
+def write_exhibit_1_final_boilerplate():
+    s = '</body>' 
+    appendHTML(s)
+    s = '</html>'
+    appendHTML(s)
+# end_def write_exhibit_1_final_boilerplate()
+
+
+def write_exhibit_1(xlsInfo):
+    write_exhibit_1_initial_boilerplate()
+    write_exhibit_1_body(xlsInfo)
+    write_exhibit_1_final_boilerplate()
 # end_def write_exhibit_1()
 
 # Write initial "boilerplate" HTML for Exhibit 2.
@@ -573,9 +690,9 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
     appendHTML(s)
 # end_def write_task_tr()
 
-##################################################################
-# Top-level routine for generating HTML for salary cost table div.
-# Calls end_def write_task_tr as a helper function.
+############################################################################
+# Top-level routine for generating HTML for Exhibit 2 salary cost table div.
+# Calls end_def write_ex2_task_tr as a helper function.
 def write_ex2_salary_cost_table_div(xlsInfo):
     s = '<div class="costTblDiv">'
     appendHTML(s)
@@ -886,6 +1003,7 @@ def write_exhibit_2_body(xlsInfo):
     appendHTML(s)
     s = 'ESTIMATED COST<br>'
     appendHTML(s)
+    # Project name
     s = str(get_cell_contents(xlsInfo['ws'], xlsInfo['project_name_cell_row_ix'], xlsInfo['project_name_cell_col_ix']))
     s = s + '<br>'
     appendHTML(s)
