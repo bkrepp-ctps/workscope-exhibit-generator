@@ -10,8 +10,16 @@
 #       <Python_installation_folder>/python.exe -m pip install openpyxl
 #       <Python_installation_folder>/python.exe -m pip install beautifulsoup4
 #
+# This script is a 'port' of a CFML application to Python. The code has been written
+# in such a way as to make correlation of a given section of Python code that produces
+# an HTML fragment as easy as possible  to correlate with the corresponding segment 
+# of CFML code. As there is no functional spec for the original CFML application 
+# (the CFML code IS the functional spec for the app, so to speak), this was essential
+# in order to ensure functional correctness and debug-ability. As a side-effect of this,
+# this code is neither particularly efficient nor particularly idiomatic Python. 
+#
 # Author: Benjamin Krepp
-# Date: 23 July - 1 August 2018
+# Date: 23 July - 2 August 2018
 #
 # Requirements on the input .xlsx spreadsheet
 # ===========================================
