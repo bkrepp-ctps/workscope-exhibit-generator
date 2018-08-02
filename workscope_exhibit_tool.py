@@ -443,12 +443,82 @@ def initialize(fullpath):
     return retval
 # end_def initialize()
 
-# The following routine is under development - just a placeholder for now.
-def write_ex1_schedule_table_body(xlsInfo):
-    pass
+
+# The following routine is under development
+def write_ex1_task_tr(task_num, task_row_ix, xlsInfo, colspan):
+    s = '<tr>'
+    appendHTML(s)
+      
+    # First <td> in row: task number and task name
+    t1 = '<td id="row' + str(task_num) + '" headers="ex1taskTblHdr" '
+    if task_num == 1:
+        t2 = 'class="firstTaskTblCell">'
+    else:
+        t2 = 'class="taskTblCell">'
+    # end_if
+    s = t1 + t2
+    appendHTML(s)
+    
+    t1 = '<div class="taskNumDiv">'
+    # *** TBD: Fetch task number from cell in  Excel file rather than using task_num
+    t2 = str(task_num) + '.'
+    t3 = '</div>'
+    s = t1 + t2 + t3
+    appendHTML(s)
+    
+    t1 = '<div class="taskNameDiv">'
+    #  *** TBD: This currently gets the task name from its cell in the cost table
+    t2 = get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['task_name_col_ix'])
+    t3 = '</div>'
+    s = t1 + t2 + t3
+    appendHTML(s)
+    # Close first <td> in row
+    s = '</td>'
+    appendHTML(s)
+    
+    # *** TBD: Move all logic for generation of 2nd <td> into a separate function
+    
+    # Seond <td> in row: schedule bar(s) and deliverable(s), (if any)
+    t1 = '<td colspan="' + str(colspan) + ' '
+    # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
+    t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
+    # *** TBD: Why is this class set according to whether or not it's the first task (i.e., row)?
+    if task_num == 1:
+        t3 = 'class="firstSchedColCell">'
+    else:
+        t3 = 'class="schedColCell">'
+    # end_if
+    s = t1 + t2 + t3
+    appendHTML(s)
+    
+    # *** TBD: Guts of 2nd <td> in row to be generated here
+    
+    # Close seond <td> in row
+    s = '</td>'
+    appendHTML(s)
+    
+    s = '</tr>'
+    appendHTML(s)
+# end_def write_ex1_task_tr()
+
+def write_ex1_schedule_table_body(xlsInfo, colspan):
+    # Open <tbody>
+    s = '<tbody>'
+    appendHTML(s)
+    # Write the <tr>s in the table body
+    i = 0
+    for task_row_ix in range(xlsInfo['task_list_top_row_ix']+1,xlsInfo['task_list_bottom_row_ix']):
+        i = i + 1
+        write_ex1_task_tr(i, task_row_ix, xlsInfo, colspan)
+    # end_for
+    # Close <tbody>
+    s = '</tbody>'
+    appendHTML(s)
+    # Close <table>
+    s = '</table>'
+    appendHTML(s)
 # end_def write_ex1_schedule_table_body()
 
-# The following routine is under development.
 def write_ex1_schedule_table(xlsInfo):
     s = '<table id="ex1Tbl"'
     s += 'summary="Breakdown of schedule by tasks in column one and calendar time ranges and deliverable dates in column two.">'
@@ -464,7 +534,8 @@ def write_ex1_schedule_table(xlsInfo):
     
     # First row of column header, second column: time unit used in table: 'Day' | 'Week' | 'Month'
     #
-    # Values of the 2 following vars are placeholders!
+    # N.B. The values of the 2 following vars are placeholders, juse for the time being.
+    #      The value of "colspan" will ONLY be either 23 or 12.
     colspan = 23 
     time_unit  = 'Week'
     t1 = '<th id="ex1weekTblHeader" class="colTblHdr"'
@@ -477,19 +548,30 @@ def write_ex1_schedule_table(xlsInfo):
     # Second row of column header: numbers of individual time units in schedule
     s = '<tr>'
     appendHTML(s)
-    
-    # *** TBD: Here generate the <th>s for the second row of column headers
-    
-    
+    # The <th>s for the second row of column headers
+    for i in range(1,colspan+1):
+        t1 = '<th id='
+        t2 = '"timeUnit' + str(i) + '"'
+        if colspan == 23:
+            t3 = ' class="scheduleColHdr24PixBorder" '
+        else:
+            # Only alternative is 12, right?
+            t3 = ' class="scheduleColHdr12PixBorder" '
+        # end_if
+        t3 += ' abbr="Schedule range">'
+        t4 = str(i) + '</th>'
+        s = t1 + t2 + t3 + t4
+        appendHTML(s)
+    # end_for
+    # Close the 2nd row of column headers
     s = '</tr>'
     appendHTML(s)
     # Close table header
     s = '</thead>'
     appendHTML(s)
-    
-    # Call subordinate routine to do the heavy lifting: generate Exhibit 2 table body
-    write_ex1_schedule_table_body(xlsInfo)
-    
+  
+    # Call subordinate routine to do the heavy lifting: generate the <table> body for Exhibit 1
+    write_ex1_schedule_table_body(xlsInfo, colspan)
 # end_def write_ex1_schedule_table()
 
 
@@ -523,7 +605,7 @@ def write_exhibit_1_body(xlsInfo):
     appendHTML(s)
     s = '<div id="exhibit1">'
     appendHTML(s)
-    s = 'class="exhibitPageLayoutDiv1"><div class="exhibitPageLayoutDiv2">'
+    s = '<div class="exhibitPageLayoutDiv1"><div class="exhibitPageLayoutDiv2">'
     appendHTML(s)
     s = '<h1>'
     appendHTML(s)
@@ -1032,9 +1114,18 @@ def write_exhibit_2(xlsInfo):
     write_exhibit_2_final_boilerplate()
 # end_def write_exhibit_2()
 
+# Pretty-formats HTML and saves it to specified filename.
+def write_html_to_file(html, filename):
+    soup = BeautifulSoup(html, 'html.parser')
+    pretty_html = soup.prettify() + '\n'
+    o = open(filename, 'w')
+    # NOTE: We need to encode the output as UTF-8 because it may contain non-ASCII characters,
+    # e.g., the "section" symbol used to identify funding sources such as <section>5303 ...
+    o.write(pretty_html.encode("UTF-8"))
+    o.close()
+# end_def write_html_to_file()
+
 # Main driver routine - this function does NOT launch a GUI.
-# Currently only generates HTML for Exhibit 2.
-# TBD: Generate HTML for Exhibit 1
 def main(fullpath):
     global accumulatedHTML # Yeech
     t1 = os.path.split(fullpath)
@@ -1047,18 +1138,14 @@ def main(fullpath):
     # Collect 'navigation' information from input .xlsx file
     xlsInfo = initialize(fullpath)
     
-    # TBD: Generate exhibit 1 HTML; write_exhibit_1() is currently just a stub.
+    # Generate Exhibit 1 HTML, and save it to disk
+    # NOTEP: write_exhibit_1() is currently a work-in-progress
     accumulatedHTML = ''
     write_exhibit_1(xlsInfo)
+    write_html_to_file(accumulatedHTML, ex_1_out_html_fn)
     
-    # Generate Exhibit 2 HTML
+    # Generate Exhibit 2 HTML, and save it to disk
     accumulatedHTML = ''
     write_exhibit_2(xlsInfo)
-    soup = BeautifulSoup(accumulatedHTML, 'html.parser')
-    ex_2_html = soup.prettify() + '\n'
-    o = open(ex_2_out_html_fn, 'w')
-    # NOTE: We need to encode the output as UTF-8 because it may contain non-ASCII characters,
-    # e.g., the "section" symbol used to identify funding sources such as <section>5303 ..
-    o.write(ex_2_html.encode("UTF-8"))
-    o.close()   
+    write_html_to_file(accumulatedHTML, ex_2_out_html_fn)
 # end_def main()
