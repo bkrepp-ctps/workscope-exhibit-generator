@@ -290,7 +290,7 @@ def initialize(fullpath):
     ws = wb['workscope_exhibits']
     retval['ws'] = ws
     
-    # Collect row and column indices for cells of interest
+    # Collect row and column indices for cells of interest for Exhibit 2
     #
     try:
         retval['project_name_cell_row_ix'] = get_row_index(wb, 'project_name_cell')
@@ -324,7 +324,7 @@ def initialize(fullpath):
         retval['overhead_cell_row_ix'] = None
         retval['overhead_cell_col_ix'] = None
     #       
-    # Collect useful row indices
+    # Collect useful row indices for Exhibit 2
     #
     try:
         retval['task_list_top_row_ix'] = get_row_index(wb, 'task_list_top')
@@ -373,7 +373,7 @@ def initialize(fullpath):
     except:
         retval['funding_list_bottom_row_ix'] = None
     #
-    # Collect useful column indices
+    # Collect useful column indices for Exhibit 2
     #
     try:
         retval['task_number_col_ix'] = get_column_index(wb, 'task_number_column')
@@ -440,6 +440,25 @@ def initialize(fullpath):
     # C'est un petit hacque: The column index for funding source names is the same as that for task names.
     #
     retval['funding_source_name_col_ix'] = retval['task_name_col_ix']
+    
+    # Collect row and column indices for cells of interest for Exhibit 1
+    #
+    try:
+        retval['milestone_label_col_ix'] = get_column_index(wb, 'milestone_label_column')
+    except:
+        retval['milestone_label_col_ix'] = None
+    try:
+        retval['milestone_name_col_ix'] = get_column_index(wb, 'milestone_name_column')
+    except:
+        retval['milestone_name_col_ix'] = None
+    try:
+        retval['milestones_list_first_row_ix'] = get_row_index(wb, 'milestones_list_first_row')
+    except:
+        retval['milestones_list_first_row_ix'] = None
+    #
+    # N.B. The last row of the milestones list is found programmatically by crawling down
+    #      milestone_label_column until the first row containing a blank cell is found.
+        
     return retval
 # end_def initialize()
 
@@ -575,7 +594,6 @@ def gen_ex1_schedule_table(xlsInfo):
 # end_def gen_ex1_schedule_table()
 
 
-# The following routine is under development
 def gen_ex1_milestone_div(xlsInfo):
     s = '<div id="milestoneDiv">'
     appendHTML(s)
@@ -591,6 +609,29 @@ def gen_ex1_milestone_div(xlsInfo):
     #   <span class="label"> LETTER_CODE_FOR_DELIVERABLE </span> NAME_OF_DELIVERABLE <br>
     # Example:
     #   <span class="label"> A: </span> Memo to MPO with initial findings <br>
+    
+    # Dumb little predicate to return True is string is empty or only contains blanks, False otherwise.
+    def is_empty(s):
+        return s.strip() == ''
+    # end_def is_empty()
+    
+    first_milestone_ix = xlsInfo['milestones_list_first_row_ix']
+    # Find the last row of the milestones list: crawl down milestone_label_column
+    # until the first row containing an 'empty' cell is found. 
+    last_milestone_ix = first_milestone_ix + 1
+    while is_empty(get_cell_contents(xlsInfo['ws'], last_milestone_ix, xlsInfo['milestone_label_col_ix'])) == False:
+        last_milestone_ix += 1
+    # end_while
+    
+    for milestone_ix in range(first_milestone_ix, last_milestone_ix):
+        t1 = '<span class="label">'
+        t2 = get_cell_contents(xlsInfo['ws'], milestone_ix, xlsInfo['milestone_label_col_ix'])
+        t3 = '</span>'
+        t4 = get_cell_contents(xlsInfo['ws'], milestone_ix, xlsInfo['milestone_name_col_ix'])
+        t5 = '<br>'
+        s = t1 + t2 + t3 + t4 + t5
+        appendHTML(s)
+    # end_for
     
     s = '</div>'
     appendHTML(s)
