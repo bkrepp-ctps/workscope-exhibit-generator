@@ -174,12 +174,26 @@
 #   column_index = cell.col_idx
 #   cell_value = ws.cell(row_index,column_index).value
 #
+# Get a cell, given a worksheet, and row and column indices
+#    cell = ws.cell(163, 24)
+#
+# Get the fill and fill pattern type of a cell
+#    fill = cell.fill
+#    patternType = fill.patternType
+#
+# N.B. The 'magic' fill patternType indicating a filled-in cell in the 
+#      schedule exhibit is 'gray125'
+#
 ###############################################################################
 
 import os
 import sys
+import re
 import openpyxl
 from bs4 import BeautifulSoup
+
+# Gross global pseudo-constant for fill styel of filled-in cells in the schedule exhibit 
+MAGIC_FILL_STYLE = 'gray125'
 
 # Gross global var in which we accumulate all HTML generated.
 accumulatedHTML = ''
@@ -444,6 +458,14 @@ def initialize(fullpath):
     # Collect row and column indices for cells of interest for Exhibit 1
     #
     try:
+        retval['first_schedule_col_ix'] = get_column_index(wb, 'first_schedule_column')
+    except:
+        retval['first_schedule_col_ix'] = None
+    try:
+        retval['last_schedule_col_ix'] = get_column_index(wb, 'last_schedule_column')
+    except:
+        retval['last_schedule_col_ix'] = None
+    try:
         retval['milestone_label_col_ix'] = get_column_index(wb, 'milestone_label_column')
     except:
         retval['milestone_label_col_ix'] = None
@@ -462,6 +484,58 @@ def initialize(fullpath):
     return retval
 # end_def initialize()
 
+
+
+def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, colspan):
+    t1 = '<td colspan="' + str(colspan) + ' '
+    # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
+    t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
+    # *** TBD: Why is this class set according to whether or not it's the first task (i.e., row)?
+    if task_num == 1:
+        t3 = 'class="firstSchedColCell">'
+    else:
+        t3 = 'class="schedColCell">'
+    # end_if
+    s = t1 + t2 + t3
+    appendHTML(s)
+    
+    # The guts of 2nd <td> in scheule row; this may contain an arbitrary number of chart 'bars' 
+    # and an arbitrary number of deliverables. Each of these is placed in a <div> of its own,
+    # generated in chronological order.
+    
+    # First: Generate a string of 0's and 1's indicating the cells in the schedule bar chart
+    #        that have been 'filled in' with the magic fill pattern 'gray125'.
+    #        Logically, we're creating a bit vector - implemented as a character vector.
+
+    my_pseudo_bv = ''
+    ws = xlsInfo['ws']
+    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_schedule_col_ix']):
+        cell = ws.cell(task_row_ix, col)
+        fill = cell.fill
+        patternType = fill.patternType
+        if patternType == MAGIC_FILL_STYLE:
+            my_pseudo_bv += '1'
+        else:
+            my_pseudo_bv += '0'
+        # end_if
+    # end_for
+
+    my_re = re.compile('1+')
+    my_iter = my_re.finditer(my_pseudo_bv)
+    for match in my_iter:
+        my_span = match.span()
+        # To get the actual column indices of the first and last cell, bias the indices
+        #  in the bitvector by the index of the first column in the schedule table
+        start = my_span[0] + xlsInfo['first_schedule_col_ix']
+        end = my_span[1] + xlsInfo['first_schedule_col_ix']
+        # do_something()
+    # end_for
+        
+    
+    # Close seond <td> in row
+    s = '</td>'
+    appendHTML(s)
+# end_def gen_ex1_task_tr_2nd_td()
 
 # The following routine is under development
 def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo, colspan):
@@ -495,27 +569,10 @@ def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo, colspan):
     s = '</td>'
     appendHTML(s)
     
-    # *** TBD: Move all logic for generation of 2nd <td> into a separate function
+    # Second <td> in row: schedule bar(s) and deliverable(s), (if any)
+    gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, colspan)
     
-    # Seond <td> in row: schedule bar(s) and deliverable(s), (if any)
-    t1 = '<td colspan="' + str(colspan) + ' '
-    # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
-    t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
-    # *** TBD: Why is this class set according to whether or not it's the first task (i.e., row)?
-    if task_num == 1:
-        t3 = 'class="firstSchedColCell">'
-    else:
-        t3 = 'class="schedColCell">'
-    # end_if
-    s = t1 + t2 + t3
-    appendHTML(s)
-    
-    # *** TBD: Guts of 2nd <td> in row to be generated here
-    
-    # Close seond <td> in row
-    s = '</td>'
-    appendHTML(s)
-    
+    # Close <tr>
     s = '</tr>'
     appendHTML(s)
 # end_def gen_ex1_task_tr()
