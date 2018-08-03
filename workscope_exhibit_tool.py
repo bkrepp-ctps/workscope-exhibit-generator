@@ -98,35 +98,35 @@
 #              of interest in the spreadsheet. It is the most important data structure
 #              in this program.
 #
-# write_exhibit_2 - driver routine for generating Exhibit 2;
-#                   calls write_exhibit_2_initial_boilerplate,
-#                   write_exhibit_2_body, and write_exhibit_2_final_boilerplate
+# gen_exhibit_2 - driver routine for generating Exhibit 2;
+#                 calls gen_exhibit_2_initial_boilerplate,
+#                 gen_exhibit_2_body, and gen_exhibit_2_final_boilerplate
 #
-# write_exhibit_2_initial_boilerplate - writes boilerplate HTML at beginning of
-#                                       Exhibit 2
+# gen_exhibit_2_initial_boilerplate - generates boilerplate HTML at beginning of
+#                                     Exhibit 2
 #
-# write_exhibit_2_final_boilerplate - writes boilerplate HTML at end of Exhibit 2
+# gen_exhibit_2_final_boilerplate - generates boilerplate HTML at end of Exhibit 2
 #
-# write_exhibit_2_body - driver routine for producing HTML for the body of Exhibit 2;
-#                        calls  write_ex2_direct_salary_div, write_ex2_salary_cost_table_div,
-#                        write_ex2_other_direct_costs_div, write_ex2_total_direct_costs_div, 
-#                        and write_ex2_funding_div
+# gen_exhibit_2_body - driver routine for producing HTML for the body of Exhibit 2;
+#                      calls  gen_ex2_direct_salary_div, gen_ex2_salary_cost_table_div,
+#                      gen_ex2_other_direct_costs_div, gen_ex2_total_direct_costs_div, 
+#                      and gen_ex2_funding_div
 #
-# write_ex2_direct_salary_div - writes "one-line div" containing total direct salary and
-#                           overhead cost
+# gen_ex2_direct_salary_div - generates "one-line div" containing total direct salary and
+#                             overhead cost
 #
-# write_ex2_other_direct_costs_div - writes "one-line div" containing total of other
-#                                direct costs
+# gen_ex2_other_direct_costs_div - generates "one-line div" containing total of other
+#                                  direct costs
 #
-# write_ex2_total_direct_costs_div - writes "one-line div" containing total cost
+# gen_ex2_total_direct_costs_div - generates "one-line div" containing total cost
 #
-# write_ex2_funding_div - writes div with list of funding source(s)
+# gen_ex2_funding_div - generates div with list of funding source(s)
 #
-# write_ex2_salary_cost_table_div - writes the div containing the salary cost table;
-#                               calls write_task_tr. This is the driver routine
-#                               for most of the work done by this program.
+# gen_ex2_salary_cost_table_div - generates the div containing the salary cost table;
+#                                 calls gen_task_tr. This is the driver routine
+#                                 for most of the work done by this program.
 #
-# write_task_tr - writes row for a given task in the work scope
+# gen_task_tr - generates row for a given task in the work scope
 #
 # Internals of this Script: Utility Functions
 # ===========================================
@@ -445,7 +445,7 @@ def initialize(fullpath):
 
 
 # The following routine is under development
-def write_ex1_task_tr(task_num, task_row_ix, xlsInfo, colspan):
+def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo, colspan):
     s = '<tr>'
     appendHTML(s)
       
@@ -499,9 +499,9 @@ def write_ex1_task_tr(task_num, task_row_ix, xlsInfo, colspan):
     
     s = '</tr>'
     appendHTML(s)
-# end_def write_ex1_task_tr()
+# end_def gen_ex1_task_tr()
 
-def write_ex1_schedule_table_body(xlsInfo, colspan):
+def gen_ex1_schedule_table_body(xlsInfo, colspan):
     # Open <tbody>
     s = '<tbody>'
     appendHTML(s)
@@ -509,7 +509,7 @@ def write_ex1_schedule_table_body(xlsInfo, colspan):
     i = 0
     for task_row_ix in range(xlsInfo['task_list_top_row_ix']+1,xlsInfo['task_list_bottom_row_ix']):
         i = i + 1
-        write_ex1_task_tr(i, task_row_ix, xlsInfo, colspan)
+        gen_ex1_task_tr(i, task_row_ix, xlsInfo, colspan)
     # end_for
     # Close <tbody>
     s = '</tbody>'
@@ -517,9 +517,9 @@ def write_ex1_schedule_table_body(xlsInfo, colspan):
     # Close <table>
     s = '</table>'
     appendHTML(s)
-# end_def write_ex1_schedule_table_body()
+# end_def gen_ex1_schedule_table_body()
 
-def write_ex1_schedule_table(xlsInfo):
+def gen_ex1_schedule_table(xlsInfo):
     s = '<table id="ex1Tbl"'
     s += 'summary="Breakdown of schedule by tasks in column one and calendar time ranges and deliverable dates in column two.">'
     appendHTML(s)
@@ -571,12 +571,12 @@ def write_ex1_schedule_table(xlsInfo):
     appendHTML(s)
   
     # Call subordinate routine to do the heavy lifting: generate the <table> body for Exhibit 1
-    write_ex1_schedule_table_body(xlsInfo, colspan)
-# end_def write_ex1_schedule_table()
+    gen_ex1_schedule_table_body(xlsInfo, colspan)
+# end_def gen_ex1_schedule_table()
 
 
 # The following routine is under development
-def write_ex1_milestone_div(xlsInfo):
+def gen_ex1_milestone_div(xlsInfo):
     s = '<div id="milestoneDiv">'
     appendHTML(s)
     s = '<div id="milestoneHdrDiv">'
@@ -596,10 +596,10 @@ def write_ex1_milestone_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_ex1_milestone_div()
+# end_def gen_ex1_milestone_div()
 
 
-def write_exhibit_1_body(xlsInfo):
+def gen_exhibit_1_body(xlsInfo):
     pass
     s = '<body style="text-align:center;padding:0pt;margin:0pt;">'
     appendHTML(s)
@@ -620,12 +620,12 @@ def write_exhibit_1_body(xlsInfo):
     s = '</h1>'
     appendHTML(s)
     #
-    write_ex1_schedule_table(xlsInfo)
-    write_ex1_milestone_div(xlsInfo)
+    gen_ex1_schedule_table(xlsInfo)
+    gen_ex1_milestone_div(xlsInfo)
 # end_def 
 
-# TBD: Combine this and write_exhibit_2_body into a single, parameterized,  routine.
-def write_exhibit_1_initial_boilerplate():
+# TBD: Combine this and gen_exhibit_2_body into a single, parameterized,  routine.
+def gen_exhibit_1_initial_boilerplate():
     s = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
     appendHTML(s)
     s = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
@@ -636,28 +636,28 @@ def write_exhibit_1_initial_boilerplate():
     appendHTML(s)
     s = '</head>'
     appendHTML(s)
-# end_def write_exhibit_1_initial_boilerplate()
+# end_def gen_exhibit_1_initial_boilerplate()
 
-# Shares 100% code with write_exhibit_1_final_boilerplate. 
+# Shares 100% code with gen_exhibit_1_final_boilerplate. 
 # TBD: Combine these two routines.
 # Write the final "boilerplate" HTML for Exhibit 1: the closing </body> and </html> tags.
-def write_exhibit_1_final_boilerplate():
+def gen_exhibit_1_final_boilerplate():
     s = '</body>' 
     appendHTML(s)
     s = '</html>'
     appendHTML(s)
-# end_def write_exhibit_1_final_boilerplate()
+# end_def gen_exhibit_1_final_boilerplate()
 
 
-def write_exhibit_1(xlsInfo):
-    write_exhibit_1_initial_boilerplate()
-    write_exhibit_1_body(xlsInfo)
-    write_exhibit_1_final_boilerplate()
-# end_def write_exhibit_1()
+def gen_exhibit_1(xlsInfo):
+    gen_exhibit_1_initial_boilerplate()
+    gen_exhibit_1_body(xlsInfo)
+    gen_exhibit_1_final_boilerplate()
+# end_def gen_exhibit_1()
 
 # Write initial "boilerplate" HTML for Exhibit 2.
 # This includes all content from DOCTYPE, the <html> tag, and everything in the <head>.
-def write_exhibit_2_initial_boilerplate():
+def gen_exhibit_2_initial_boilerplate():
     s = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
     appendHTML(s)
     s = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
@@ -668,17 +668,17 @@ def write_exhibit_2_initial_boilerplate():
     appendHTML(s)
     s = '</head>'
     appendHTML(s)
-# end_def write_exhibit_2_initial_boilerplate()
+# end_def gen_exhibit_2_initial_boilerplate()
 
 # This writes the final "boilerplate" HTML for Exhibit 2: the closing </body> and </html> tags.
-def write_exhibit_2_final_boilerplate():
+def gen_exhibit_2_final_boilerplate():
     s = '</body>' 
     appendHTML(s)
     s = '</html>'
     appendHTML(s)
-# end_def write_exhibit_2_final_boilerplate()
+# end_def gen_exhibit_2_final_boilerplate()
 
-def write_ex2_direct_salary_div(xlsInfo):
+def gen_ex2_direct_salary_div(xlsInfo):
     s = '<div id="directSalaryDiv" class="barH2">'
     appendHTML(s)
     s = '<h2>Direct Salary and Overhead</h2>'
@@ -690,15 +690,15 @@ def write_ex2_direct_salary_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_ex2_direct_salary_div()
+# end_def gen_ex2_direct_salary_div()
 
 ######################################################################################################
 # Helper function to generate <tr> (and its contents) for one task in the salary cost table.
-# This function is called only from write_ex2_salary_cost_table_div, which it is LOGICALLY nested within.
+# This function is called only from gen_ex2_salary_cost_table_div, which it is LOGICALLY nested within.
 # In order to expedite development/prototyping, however, it is currently defined here at scope-0.
 # When the tool has become stable, move it within the def of salary_cost_table_div.
 #
-def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
+def gen_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
     # Open <tr> element
     t1 = '<tr id='
     tr_id = 'taskHeader' + str(task_num)
@@ -779,12 +779,12 @@ def write_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
     
     s = '</tr>'
     appendHTML(s)
-# end_def write_task_tr()
+# end_def gen_task_tr()
 
 ############################################################################
 # Top-level routine for generating HTML for Exhibit 2 salary cost table div.
-# Calls end_def write_ex2_task_tr as a helper function.
-def write_ex2_salary_cost_table_div(xlsInfo):
+# Calls end_def gen_ex2_task_tr as a helper function.
+def gen_ex2_salary_cost_table_div(xlsInfo):
     s = '<div class="costTblDiv">'
     appendHTML(s)
     s = '<table id="ex2Tbl" summary="Breakdown of staff time by task in column one, expressed in person weeks for each implicated pay grade in the middle columns,'
@@ -896,7 +896,7 @@ def write_ex2_salary_cost_table_div(xlsInfo):
     i = 0
     for task_row_ix in range(xlsInfo['task_list_top_row_ix']+1,xlsInfo['task_list_bottom_row_ix']):
         i = i + 1
-        write_task_tr(i, task_row_ix, xlsInfo, real_cols_info)
+        gen_task_tr(i, task_row_ix, xlsInfo, real_cols_info)
     # end_for
     
     # The 'Total' row
@@ -962,9 +962,9 @@ def write_ex2_salary_cost_table_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_ex2_salary_cost_table_div()
+# end_def gen_ex2_salary_cost_table_div()
 
-def write_ex2_other_direct_costs_div(xlsInfo):
+def gen_ex2_other_direct_costs_div(xlsInfo):
     s = '<div id="otherDirectDiv" class="barH2">'
     appendHTML(s)
     s = '<h2>Other Direct Costs</h2>'
@@ -984,7 +984,7 @@ def write_ex2_other_direct_costs_div(xlsInfo):
     appendHTML(s)
     
     # Utiltiy function to write HTML for one kind of 'other direct cost.'
-    def write_odc(name, cost):
+    def gen_odc(name, cost):
         s = '<div class="otherExpDiv">'
         appendHTML(s)
         s = '<div class="otherExpDescDiv">' + name + '</div>'
@@ -993,45 +993,45 @@ def write_ex2_other_direct_costs_div(xlsInfo):
         appendHTML(s)
         s = '</div>'
         appendHTML(s)
-    # end_def write_odc()
+    # end_def gen_odc()
     
     # Travel
     travel = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_travel_line_ix'], xlsInfo['total_cost_col_ix'])
     if travel != 0:
-        write_odc('Travel', travel)
+        gen_odc('Travel', travel)
     
     # General office equipment
     general_office_equipment = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_office_equipment_line_ix'], xlsInfo['total_cost_col_ix'])
     if general_office_equipment != 0:
-        write_odc('General Office Equipment', general_office_equipment)
+        gen_odc('General Office Equipment', general_office_equipment)
     
     # Data processing equipment
     dp_equipment = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_dp_equipment_line_ix'], xlsInfo['total_cost_col_ix'])
     if dp_equipment != 0:
-        write_odc('Data Processing Equipent', dp_equipment)
+        gen_odc('Data Processing Equipent', dp_equipment)
     
     # Consultant(s)
     consultants = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_consultants_line_ix'], xlsInfo['total_cost_col_ix'])
     if consultants != 0:
-        write_odc('Consultants', consultants)
+        gen_odc('Consultants', consultants)
     
     # Printing
     printing = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_printing_line_ix'], xlsInfo['total_cost_col_ix'])
     if printing != 0:
-        write_odc('Printing', printing)
+        gen_odc('Printing', printing)
     
     # Other 
     other = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_other_line_ix'], xlsInfo['total_cost_col_ix'])
     if other != 0:
         desc = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_other_line_ix'], xlsInfo['task_name_col_ix'])
-        write_odc(desc, other)
+        gen_odc(desc, other)
     
     # </div> for wrapper
     s = '</div>'
     appendHTML(s)
-# end_def write_ex2_other_direct_costs_div()
+# end_def gen_ex2_other_direct_costs_div()
 
-def write_ex2_total_direct_costs_div(xlsInfo):
+def gen_ex2_total_direct_costs_div(xlsInfo):
     s = '<div id="totalDirectDiv" class="barH2">'
     appendHTML(s)
     s = '<h2>TOTAL COST</h2>'
@@ -1043,9 +1043,9 @@ def write_ex2_total_direct_costs_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_ex2_total_direct_costs_div()
+# end_def gen_ex2_total_direct_costs_div()
 
-def write_ex2_funding_div(xlsInfo):
+def gen_ex2_funding_div(xlsInfo):
     s = '<div id="fundingDiv">'
     appendHTML(s)
     s = '<div id="fundingHdrDiv">'
@@ -1072,7 +1072,7 @@ def write_ex2_funding_div(xlsInfo):
     appendHTML(s)
     s = '</div>'
     appendHTML(s)
-# end_def write_ex2_funding_div()
+# end_def gen_ex2_funding_div()
 
 # This writes the HTML for the entire <body> of Exhibit 2, including:
 #   the opening <body> tag
@@ -1081,7 +1081,7 @@ def write_ex2_funding_div(xlsInfo):
 #   the div for the salary cost table
 #   the div forthe "Other Direct Costs" line
 #   the div for funding source(s)
-def write_exhibit_2_body(xlsInfo):
+def gen_exhibit_2_body(xlsInfo):
     s = '<body style="text-align:center;margin:0pt;padding:0pt;">'
     appendHTML(s)
     s = '<div id="exhibit2">'
@@ -1101,18 +1101,18 @@ def write_exhibit_2_body(xlsInfo):
     s = '</h1>'
     appendHTML(s)
     #
-    write_ex2_direct_salary_div(xlsInfo)
-    write_ex2_salary_cost_table_div(xlsInfo)
-    write_ex2_other_direct_costs_div(xlsInfo)
-    write_ex2_total_direct_costs_div(xlsInfo)
-    write_ex2_funding_div(xlsInfo)
-# end_def write_exhibit_2_body()
+    gen_ex2_direct_salary_div(xlsInfo)
+    gen_ex2_salary_cost_table_div(xlsInfo)
+    gen_ex2_other_direct_costs_div(xlsInfo)
+    gen_ex2_total_direct_costs_div(xlsInfo)
+    gen_ex2_funding_div(xlsInfo)
+# end_def gen_exhibit_2_body()
 
-def write_exhibit_2(xlsInfo):
-    write_exhibit_2_initial_boilerplate()
-    write_exhibit_2_body(xlsInfo)
-    write_exhibit_2_final_boilerplate()
-# end_def write_exhibit_2()
+def gen_exhibit_2(xlsInfo):
+    gen_exhibit_2_initial_boilerplate()
+    gen_exhibit_2_body(xlsInfo)
+    gen_exhibit_2_final_boilerplate()
+# end_def gen_exhibit_2()
 
 # Pretty-formats HTML and saves it to specified filename.
 def write_html_to_file(html, filename):
@@ -1139,13 +1139,13 @@ def main(fullpath):
     xlsInfo = initialize(fullpath)
     
     # Generate Exhibit 1 HTML, and save it to disk
-    # NOTEP: write_exhibit_1() is currently a work-in-progress
+    # NOTE: gen_exhibit_1() is currently a work-in-progress
     accumulatedHTML = ''
-    write_exhibit_1(xlsInfo)
+    gen_exhibit_1(xlsInfo)
     write_html_to_file(accumulatedHTML, ex_1_out_html_fn)
     
     # Generate Exhibit 2 HTML, and save it to disk
     accumulatedHTML = ''
-    write_exhibit_2(xlsInfo)
+    gen_exhibit_2(xlsInfo)
     write_html_to_file(accumulatedHTML, ex_2_out_html_fn)
 # end_def main()
