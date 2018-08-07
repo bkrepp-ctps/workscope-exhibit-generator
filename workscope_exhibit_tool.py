@@ -192,10 +192,13 @@ import re
 import openpyxl
 from bs4 import BeautifulSoup
 
+debug_flags = {}
+debug_flags['dump_sched_elements'] = False
+
 # Gross global pseudo-constant for fill styel of filled-in cells in the schedule exhibit 
 MAGIC_FILL_STYLE = 'gray125'
 
-# Gross global var in which we accumulate all HTML generated.
+# Gross global var in which we accumulate all HTML generated
 accumulatedHTML = ''
 
 # Append string to gross globabl variable accumulatedHTML 
@@ -487,6 +490,7 @@ def initialize(fullpath):
 
 
 def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, colspan):
+    global debug_flags
     t1 = '<td colspan="' + str(colspan) + ' '
     # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
     t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
@@ -499,38 +503,87 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, colspan):
     s = t1 + t2 + t3
     appendHTML(s)
     
-    # The guts of 2nd <td> in scheule row; this may contain an arbitrary number of chart 'bars' 
-    # and an arbitrary number of deliverables. Each of these is placed in a <div> of its own,
-    # generated in chronological order.
+    # The guts of 2nd <td> in schedule row.
+    # This may contain an arbitrary number of chart 'bars' and an arbitrary number
+    # of 'milestones'. Each of these is placed in a <div> of its own,  generated in 
+    # ascending chronological order.
+    #
+    # In order to this, we build (1) a list of 'bars' and (2) a list of 'milestones,'
+    # both in ascending chronological (i.e., column) order. We use a common dictionary 
+    # data structure for each element of these two lists:
+    #     'type'      : 'bar' or 'milestone'
+    #     'start'     : start column index
+    #     'end'       : end column index   ('start' == 'end' for milestones)
+    #     'milestone' : if item is a milestone, the milestone letter, otherwise ''
+    # We then merge the two lists, maintaining ascending chronological order.  
+    # Having done this, we will then be in a position to generate the relevant HTML.
     
-    # First: Generate a string of 0's and 1's indicating the cells in the schedule bar chart
-    #        that have been 'filled in' with the magic fill pattern 'gray125'.
-    #        Logically, we're creating a bit vector - implemented as a character vector.
-
+    # Generate the list of 'bars'
+    # Prep work: Generate a string of 0's and 1's indicating the cells in the schedule
+    # bar chart that have been 'filled in' with the magic fill pattern 'gray125'.
+    # Logically, we're creating a bit vector; it's implemented, however as a vector
+    # of '0' and '1' characters in a string.
     my_pseudo_bv = ''
     ws = xlsInfo['ws']
     for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_schedule_col_ix']):
         cell = ws.cell(task_row_ix, col)
         fill = cell.fill
         patternType = fill.patternType
-        if patternType == MAGIC_FILL_STYLE:
-            my_pseudo_bv += '1'
-        else:
-            my_pseudo_bv += '0'
-        # end_if
+        my_pseudo_bv += '1' if patternType == MAGIC_FILL_STYLE else '0'
     # end_for
-
+    
+    # The list of 'bars'
+    bars = []
     my_re = re.compile('1+')
     my_iter = my_re.finditer(my_pseudo_bv)
     for match in my_iter:
         my_span = match.span()
         # To get the actual column indices of the first and last cell, bias the indices
-        #  in the bitvector by the index of the first column in the schedule table
+        # in the bitvector by the index of the first column in the schedule table
         start = my_span[0] + xlsInfo['first_schedule_col_ix']
-        end = my_span[1] + xlsInfo['first_schedule_col_ix']
-        # do_something()
+        end = my_span[1] + xlsInfo['first_schedule_col_ix'] - 1
+        # Debug:
+        # print "task #" + str(task_num) + " start: " + str(start) + " end: " + str(end)
+        temp = {}
+        temp['type'] = 'bar'
+        temp['start'] = start
+        temp['end'] = end
+        temp['milestone'] = ''
+        bars.append(temp)
     # end_for
-        
+    
+    # Generate the list of 'milestones'
+    milestones = []
+    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_schedule_col_ix']):
+        val = get_cell_contents(xlsInfo['ws'], task_row_ix, col)
+        if str(val).isupper():
+            # Debug:
+            # print "milestone : " + str(val) + " start: " + str(col)
+            temp = {}
+            temp['type'] = 'milestone'
+            temp['start'] = col
+            temp['end'] = col
+            temp['milestone'] = val
+            milestones.append(temp)
+        # end_if
+    # end_for
+    
+    # Combine 'bars' and 'milestones' into a single list, and sort the result 
+    # on (1) the 'start' value and (2) the 'type'.
+    # N.B. 'bar' appears before 'milestone' in the sort order for 'type', 
+    #      so thereby ensure that the HTML for task bars are generated before
+    #      the HTML for any milesones occuring within them.
+    big_list = bars + milestones
+    big_list_sorted = sorted(big_list, key=lambda x: (x['start'], x['type']))
+    for thing in big_list_sorted:
+        # Debug:
+        if debug_flags['dump_sched_elements'] == True:
+            print '*** ' + thing['type'] + ' ' + str(thing['start']) + ' ' + str(thing['end']) + ' ' + thing['milestone']
+        # end_if
+    # end_for
+    
+    
+    
     
     # Close seond <td> in row
     s = '</td>'
