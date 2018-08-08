@@ -24,7 +24,6 @@
 # Author: Benjamin Krepp
 # Date: 23 July - 8 August 2018
 #   
-# 
 # Internals of this Module: Top-level Functions
 # =============================================
 #
