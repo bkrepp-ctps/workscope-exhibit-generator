@@ -142,6 +142,7 @@
 ###############################################################################
 
 import openpyxl
+import re
 
 # Fill style of filled-in cells in the schedule exhibit 
 MAGIC_FILL_STYLE = 'gray125'

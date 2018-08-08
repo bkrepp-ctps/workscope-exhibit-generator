@@ -77,7 +77,7 @@ import math
 import re
 import openpyxl
 from bs4 import BeautifulSoup
-from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, get_sched_col_info, MAGIC_FILL_STYLE
+from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, get_sched_col_info, get_last_used_sched_column, MAGIC_FILL_STYLE
 
 debug_flags = {}
 debug_flags['dump_sched_elements'] = False
