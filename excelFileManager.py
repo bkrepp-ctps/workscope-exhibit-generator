@@ -75,6 +75,8 @@
 #                       printing; only the row index of this cell is used
 #   odc_other_line - any cell on line containing Ohter Direct Costs: other;
 #                    only the row index of this cell is used
+#   sched_major_units_cell - cell containing the 'major units' (which may be
+#                       Quarters, Months, or Weeks) used to express the schedule
 #
 # Internals of this Module: Top-level Functions
 # =============================================
@@ -182,9 +184,16 @@ def get_cell_contents(ws, row_ix, col_ix):
 
 
 # Open the workbook (.xlsx file) inidicated by the "fullpath" parameter.
-# Return a dictionary containing all row and column inidices of interest,
-# as well as entries for the workbook itself and the worksheet containing
-# the workscope exhibit data.
+# Return a dictionary containing:
+#     1. the workbook itself
+#     2. the worksheet containing the workscope exhibit data
+#     3. all row and column inidices of interest in (2)
+#     4. several values derived from (3) that effectively capture
+#        the state of the workbook:
+#        a. the major- and minor-units used to express the schedule
+#        b. the column number containing the 'last' real data value,
+#           either a filled-in task duration cell or a milestone
+#        c. the number of column header cells 
 # 
 def initExcelFile(fullpath):
     # retval dictionary
@@ -371,10 +380,27 @@ def initExcelFile(fullpath):
         retval['milestones_list_first_row_ix'] = get_row_index(wb, 'milestones_list_first_row')
     except:
         retval['milestones_list_first_row_ix'] = None
-    #
     # N.B. The last row of the milestones list is found programmatically by crawling down
     #      milestone_label_column until the first row containing a blank cell is found.
-        
+    
+    try:
+        row_ix = get_row_index(wb, 'sched_major_units_cell')
+        col_ix = get_column_index(wb, 'sched_major_units_cell')
+        maj_units = get_cell_contents(ws, row_ix, col_ix)
+        retval['sched_major_units'] = maj_units
+        if maj_units == 'Quarters':
+            min_units = 'Months'
+        elif maj_units == 'Months':
+            min_units = 'Weeks'
+        else:
+            # Assume major unit is 'Weeks'
+            min_units = 'Days'
+        # end_if
+        retval['sched_minor_units'] = min_units
+    except:
+        retval['sched_major_units'] = None
+        retval['sched_minor_units'] = None
+    #
     return retval
 # end_def initExcelFile()
 
