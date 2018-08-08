@@ -139,6 +139,7 @@
 #
 ###############################################################################
 
+import openpyxl
 
 # Return the column index for a defined name assigned to A SINGLE CELL.
 # Note: In Excel, the scope of 'defined names' is the entire workBOOK, not a particular workSHEET.
