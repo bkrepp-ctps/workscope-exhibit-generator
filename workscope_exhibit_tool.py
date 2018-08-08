@@ -77,7 +77,7 @@ import math
 import re
 import openpyxl
 from bs4 import BeautifulSoup
-from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, get_sched_col_info
+from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, get_sched_col_info, MAGIC_FILL_STYLE
 
 debug_flags = {}
 debug_flags['dump_sched_elements'] = False
@@ -87,8 +87,6 @@ debug_flags['dump_sched_elements'] = False
 WEEKS_PER_MONTH = 52.0/12.0
 WEEKS_PER_QUARTER = 52/4
 BAR_UNIT_IN_POINTS = 34.6875
-# Fill style of filled-in cells in the schedule exhibit 
-MAGIC_FILL_STYLE = 'gray125'
 
 # Gross global var in which we accumulate all HTML generated
 accumulatedHTML = ''

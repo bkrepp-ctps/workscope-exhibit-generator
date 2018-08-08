@@ -143,6 +143,9 @@
 
 import openpyxl
 
+# Fill style of filled-in cells in the schedule exhibit 
+MAGIC_FILL_STYLE = 'gray125'
+
 # Return the column index for a defined name assigned to A SINGLE CELL.
 # Note: In Excel, the scope of 'defined names' is the entire workBOOK, not a particular workSHEET.
 def get_column_index(wb, name):
@@ -180,6 +183,39 @@ def get_cell_contents(ws, row_ix, col_ix):
         retval = temp
     return retval
 # end_def get_cell_contents()
+
+# Return the column index of the right-most schedule column
+# that is either filled-in as part of a task duration or
+# contains an upper-case character indicating a milestone.
+def get_last_used_sched_column(xlsInfo):
+    retval = 0
+    ws = xlsInfo['ws']
+    first_col = xlsInfo['first_schedule_col_ix']   
+    last_col = xlsInfo['last_schedule_col_ix']
+    first_row = xlsInfo['task_list_top_row_ix']
+    last_row = xlsInfo['task_list_bottom_row_ix']
+    # Search 'backwards' in time through the schedule, i.e., right-to-left
+    for col in range(last_col - 1, first_col -1 , -1):
+        bv = ''
+        for row in range(first_row+1,last_row):
+            cell = ws.cell(row,col)
+            fill = cell.fill
+            patternType = fill.patternType
+            contents = get_cell_contents(ws,row,col)
+            if patternType == MAGIC_FILL_STYLE or str(contents).isupper():
+                bv += '1'
+            else:
+                bv += '0'
+            # end_if
+        # end_for
+        if re.search('1',bv) != None:
+            # Column has real data
+            retval = col
+            break
+        # end_if
+    # end_for
+    return retval
+# end_def get_last_used_sched_column()
 
 
 
