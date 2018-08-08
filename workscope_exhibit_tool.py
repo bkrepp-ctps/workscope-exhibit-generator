@@ -77,7 +77,8 @@ import math
 import re
 import openpyxl
 from bs4 import BeautifulSoup
-from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, get_sched_col_info, get_last_used_sched_column, MAGIC_FILL_STYLE
+from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, \
+                             get_last_used_sched_column, MAGIC_FILL_STYLE
 
 debug_flags = {}
 debug_flags['dump_sched_elements'] = False
@@ -143,9 +144,9 @@ def format_dollars(dollars):
 
 
 
-def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, sched_col_info):
+def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
     global debug_flags
-    t1 = '<td colspan="' + str(sched_col_info['schedule_columns']) + ' '
+    t1 = '<td colspan="' + str(xlsInfo['num_sched_col_header_cells']) + ' '
     # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
     t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
     # *** TBD: Why is this class set according to whether or not it's the first task (i.e., row)?
@@ -179,7 +180,7 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, sched_col_info):
     # of '0' and '1' characters in a string.
     my_pseudo_bv = ''
     ws = xlsInfo['ws']
-    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_schedule_col_ix']):
+    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_used_schedule_col_ix']):
         cell = ws.cell(task_row_ix, col)
         fill = cell.fill
         patternType = fill.patternType
@@ -208,7 +209,7 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, sched_col_info):
     
     # Generate the list of 'milestones'
     milestones = []
-    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_schedule_col_ix']):
+    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_used_schedule_col_ix']):
         val = get_cell_contents(xlsInfo['ws'], task_row_ix, col)
         if str(val).isupper():
             # Debug:
@@ -237,6 +238,7 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, sched_col_info):
     # end_for
     
 
+    # Generation of the <divs> for the schedule bars and milestones goes here.
     
     
     # Close seond <td> in row
@@ -245,7 +247,7 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, sched_col_info):
 # end_def gen_ex1_task_tr_2nd_td()
 
 # The following routine is under development
-def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo, sched_col_info):
+def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo):
     s = '<tr>'
     appendHTML(s)
       
@@ -277,14 +279,14 @@ def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo, sched_col_info):
     appendHTML(s)
     
     # Second <td> in row: schedule bar(s) and deliverable(s), (if any)
-    gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo, sched_col_info)
+    gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo)
     
     # Close <tr>
     s = '</tr>'
     appendHTML(s)
 # end_def gen_ex1_task_tr()
 
-def gen_ex1_schedule_table_body(xlsInfo, sched_col_info):
+def gen_ex1_schedule_table_body(xlsInfo):
     # Open <tbody>
     s = '<tbody>'
     appendHTML(s)
@@ -292,7 +294,7 @@ def gen_ex1_schedule_table_body(xlsInfo, sched_col_info):
     i = 0
     for task_row_ix in range(xlsInfo['task_list_top_row_ix']+1,xlsInfo['task_list_bottom_row_ix']):
         i = i + 1
-        gen_ex1_task_tr(i, task_row_ix, xlsInfo, sched_col_info)
+        gen_ex1_task_tr(i, task_row_ix, xlsInfo)
     # end_for
     # Close <tbody>
     s = '</tbody>'
@@ -301,76 +303,6 @@ def gen_ex1_schedule_table_body(xlsInfo, sched_col_info):
     s = '</table>'
     appendHTML(s)
 # end_def gen_ex1_schedule_table_body()
-
-# Collect and compute information on columnar organization
-# of the schedule chart in Exhibit 1
-def get_sched_col_info(xlsInfo):
-    rv = {}
-    
-    # ***  How to get 'last_week'? Harvest from .xlsx file????
-    # Placeholder, for now.
-    rv['last_week'] = 48
-    
-    # Placeholder, for now.
-    # *** TBD: Harvest this value from input .xlsx and store in xlsInfo in initialize()
-    rv['sched_unit'] = 'w' 
-    
-    # Comments from CFML code:
-    # if the project will span 12 weeks or less, or 6-12 months, the column width will be such that
-	# 12 columns would fit in the space alloted (wide columns), other so that 24 columns would fit (narrow)
-    
-    if rv['last_week'] <= 13:
-        rv['sched_col_width_basis'] = 12
-        rv['column_unit'] = 'w'
-    elif rv['last_week'] <= 25:
-        if rv['schedule_unit'] == 'months':
-            rv['schedule_col_width_basis'] = 12
-            rv['column_unit'] = 'm'
-        else:
-            rv['schedule_col_width_basis'] = 24
-            rv['column_unit'] = 'w'
-        # end_if
-    elif rv['last_week'] <= 53:
-        # Project is one year or less, but moe than six months
-        rv['sched_col_width_basis'] = 12
-        rv['column_unit'] = 'm'
-    elif rv['last_week'] <= 105:
-        # Project is two years or less, but more than one year
-        rv['sched_col_width_basis'] = 24
-        rv['column_unit'] = 'm'
-    elif rv['last_week'] < 157:
-        # Project is three years or less, but more than two years
-        rv['sched_col_width_basis'] = 12
-        rv['column_unit'] = 'q'
-    else:
-        # Project is more than three years long
-        # Note, however, that projects more than four years long just won't fit
-        rv['sched_col_width_basis'] = 24
-        rv['column_unit'] = 'q'
-    # end_if
-    
-    # Each bar unit is a column, and if the column headings are in months, 
-    # then each bar unit is slightly over 4 weeks
-    if rv['column_unit'] == 'm':
-        rv['weeks_per_bar_unit'] = WEEKS_PER_MONTH
-    elif column_unit == 'q':
-        rv['weeks_per_bar_unit'] = WEEKS_PER_QUARTER
-    else:
-        rv['weeks_per_bar_unit'] = 1
-    # end_if
-    
-    # Set 'schedule_columns'
-    # CFML statment: schedule_columns = Ceiling(Round(100*(last_week - 1)/weeks_per_bar_unit)/100)
-    rv['schedule_columns'] = int(math.ceil(round(100*(rv['last_week'] - 1)/rv['weeks_per_bar_unit'],0)/100))
-    
-    # Debug:
-    print 'schedule_columns = ' + str(rv['schedule_columns'])
-
-    # This is now hardwired
-    rv['cell_border_unit'] = 'PixBorder'    
-    
-    return rv
-# end_def get_sched_col_info()
 
 def gen_ex1_schedule_table(xlsInfo):
     s = '<table id="ex1Tbl"'
@@ -385,48 +317,40 @@ def gen_ex1_schedule_table(xlsInfo):
     s = '<th id="ex1taskTblHdr" class="colTblHdr" rowspan="2"><br>Task</th>'
     appendHTML(s)
     
-    # Prep for generation of 2nd row of table <head> column header
-    # and the table <body>
-    sched_col_info = get_sched_col_info(xlsInfo)
-    
-    # First row of column header, second column: time unit used in table, e.g., 'Week'
+    # First row of table header, second column: name of MAJOR time unit used in table,
+    # i.e., either 'Quarter', 'Month' or 'Week'
     #
 
     t1 = '<th id="ex1weekTblHeader" class="colTblHdr"'
-    t2 = 'colspan="' + str(sched_col_info['schedule_columns']) + '">' 
-    if sched_col_info['column_unit'] == 'm':
-        t3 = 'Month'
-    elif sched_col_info['column_unit'] == '1':
-        t3 = 'Quarter'
-    else:
-        t3 = 'Week'
-    # end_if
+    t2 = 'colspan="' + str(xlsInfo['num_sched_col_header_cells']) + '">' 
+    t3 = xlsInfo['sched_major_units']
     t4 = '</th>'
     s = t1 + t2 +t3 + t4
     appendHTML(s)
     s = '</tr>'
     appendHTML(s)
     
-
-    # Second row of column header: numbers of individual time units in schedule
+    # Second row of table header: the numbers of the individual MAJOR time units in schedule
     s = '<tr>'
     appendHTML(s)
-    # The <th>s for the second row of column headers
-    # *** TBD: Chekc that we're using the right value here.
-    for i in range(1,sched_col_info['schedule_columns']+1):
+    # The <th>s for the second row of headers,
+    # the numbers of the MAJOR schedule units actually used in the schedule
+    
+    if xlsInfo['num_sched_col_header_cells'] <= 12:
+        sched_header_cell_class_string = ' class="scheduleColHdr24PixBorder" '
+    else:
+        sched_header_cell_class_string = ' class="scheduleColHdr12PixBorder" '
+    # end_if
+    
+    for i in range(1,xlsInfo['num_sched_col_header_cells']+1):
         t1 = '<th id='
         t2 = '"timeUnit' + str(i) + '"'
-        if sched_col_info['schedule_columns'] == 23:
-            t3 = ' class="scheduleColHdr24PixBorder" '
-        else:
-            # Only alternative is 12, right?
-            t3 = ' class="scheduleColHdr12PixBorder" '
-        # end_if
-        t3 += ' abbr="Schedule range">'
+        t3 = sched_header_cell_class_string + ' abbr="Schedule range">'
         t4 = str(i) + '</th>'
         s = t1 + t2 + t3 + t4
         appendHTML(s)
     # end_for
+    
     # Close the 2nd row of column headers
     s = '</tr>'
     appendHTML(s)
@@ -436,7 +360,7 @@ def gen_ex1_schedule_table(xlsInfo):
     appendHTML(s)
   
     # Call subordinate routine to do the heavy lifting: generate the <table> body for Exhibit 1
-    gen_ex1_schedule_table_body(xlsInfo, sched_col_info)
+    gen_ex1_schedule_table_body(xlsInfo)
 # end_def gen_ex1_schedule_table()
 
 

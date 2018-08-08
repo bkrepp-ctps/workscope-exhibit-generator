@@ -188,8 +188,11 @@ def get_cell_contents(ws, row_ix, col_ix):
 # Return the column index of the right-most schedule column
 # that is either filled-in as part of a task duration or
 # contains an upper-case character indicating a milestone.
+# This function is logically nested within initExcelFile,
+# but has been coded here at scope-0 for the sake of easy
+# development and debugging.
 def get_last_used_sched_column(xlsInfo):
-    retval = 0
+    rv = 0
     ws = xlsInfo['ws']
     first_col = xlsInfo['first_schedule_col_ix']   
     last_col = xlsInfo['last_schedule_col_ix']
@@ -211,14 +214,12 @@ def get_last_used_sched_column(xlsInfo):
         # end_for
         if re.search('1',bv) != None:
             # Column has real data
-            retval = col
+            rv = col
             break
         # end_if
     # end_for
-    return retval
+    return rv
 # end_def get_last_used_sched_column()
-
-
 
 # Open the workbook (.xlsx file) inidicated by the "fullpath" parameter.
 # Return a dictionary containing:
@@ -425,24 +426,48 @@ def initExcelFile(fullpath):
         col_ix = get_column_index(wb, 'sched_major_units_cell')
         maj_units = get_cell_contents(ws, row_ix, col_ix)
         retval['sched_major_units'] = maj_units
-        if maj_units == 'Quarters':
-            min_units = 'Months'
-        elif maj_units == 'Months':
-            min_units = 'Weeks'
+        if maj_units == 'Quarter':
+            min_units = 'Month'
+            num_subdivisions = 3
+        elif maj_units == 'Month':
+            min_units = 'Week'
+            num_subdivisions = 4
         else:
             # Assume major unit is 'Weeks'
-            min_units = 'Days'
+            min_units = 'Day'
+            num_subdivisions = 5
         # end_if
         retval['sched_minor_units'] = min_units
+        retval['num_sched_subdivisions'] = num_subdivisions
     except:
         retval['sched_major_units'] = None
         retval['sched_minor_units'] = None
+        retval['num_sched_subdivisions'] = None
     #
+    # N.B. The slightly incomplete 'retval' is passed to get_last_used_sched_column
+    last_used_schedule_col_ix = get_last_used_sched_column(retval)
+    retval['last_used_schedule_col_ix'] = last_used_schedule_col_ix
+    num_minor_sched_units = retval['last_used_schedule_col_ix'] - retval['first_schedule_col_ix'] + 1
+    
+    # Debug
+    # print '*** num_minor_sched_units : ' + str(num_minor_sched_units)
+    
+    num_major_sched_units = (num_minor_sched_units/num_subdivisions)
+    num_major_sched_units += 0 if ((num_minor_sched_units % num_subdivisions) == 0) else 1
+      
+    # Debug      
+    # print '*** num_major_sched_units : ' + str(num_major_sched_units)
+    
+    retval['num_sched_col_header_cells'] = num_major_sched_units
     return retval
 # end_def initExcelFile()
 
+
+# This function is now (08/08/2018) a fossil.
+# Leaving the code in place for the time being for reference purposes only.
+# 
 # Collect and compute information on columnar organization
-# of the schedule chart in Exhibit 1
+# of the schedule chart in Exhibit 1.
 def get_sched_col_info(xlsInfo):
     rv = {}
     
