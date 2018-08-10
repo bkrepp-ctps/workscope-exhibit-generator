@@ -78,7 +78,8 @@ import re
 import openpyxl
 from bs4 import BeautifulSoup
 from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, \
-                             get_last_used_sched_column, MAGIC_FILL_STYLE
+                             get_last_used_sched_column, MAGIC_FILL_STYLE, \
+                             dump_xlsInfo
 
 debug_flags = {}
 debug_flags['dump_sched_elements'] = False
@@ -948,15 +949,19 @@ def main(fullpath):
     
     # Collect 'navigation' information from input .xlsx file
     xlsInfo = initExcelFile(fullpath)
+    if xlsInfo['errors'] != '':
+        # Generate Exhibit 1 HTML, and save it to disk
+        # NOTE: gen_exhibit_1() is currently a work-in-progress
+        accumulatedHTML = ''
+        gen_exhibit_1(xlsInfo)
+        write_html_to_file(accumulatedHTML, ex_1_out_html_fn)
     
-    # Generate Exhibit 1 HTML, and save it to disk
-    # NOTE: gen_exhibit_1() is currently a work-in-progress
-    accumulatedHTML = ''
-    gen_exhibit_1(xlsInfo)
-    write_html_to_file(accumulatedHTML, ex_1_out_html_fn)
-    
-    # Generate Exhibit 2 HTML, and save it to disk
-    accumulatedHTML = ''
-    gen_exhibit_2(xlsInfo)
-    write_html_to_file(accumulatedHTML, ex_2_out_html_fn)
+        # Generate Exhibit 2 HTML, and save it to disk
+        accumulatedHTML = ''
+        gen_exhibit_2(xlsInfo)
+        write_html_to_file(accumulatedHTML, ex_2_out_html_fn)
+    else:
+        print 'HTML generation aborted.\nErrors found when reading ' + fullpath + ':\n'
+        print xlsInfo['errors']        
+    # end_if
 # end_def main()
