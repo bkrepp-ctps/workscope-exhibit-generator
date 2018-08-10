@@ -104,9 +104,10 @@
 #                     and column index
 #
 #
-# A Guide for the Perplexed (with apologies to Maimonides):
-# An 'Ultra-quck' Quick Start Guide to Using the OpenPyXl Library
-# ===============================================================
+# A Guide for the Perplexed (with apologies to Maimonides),
+#                           or
+# An 'Ultra-quick' Quick-start Guide to Using the OpenPyXl Library
+# ================================================================
 #
 # Open an .xlsx workbook:
 #   wb = openpyxl.load_workbook(full_path_to_workbook_file, data_only=True)
@@ -239,21 +240,80 @@ def dump_xlsInfo(xlsInfo):
 
 # Open the workbook (.xlsx file) inidicated by the "fullpath" parameter.
 # Return a dictionary containing the items listed below, which is in
-# (almost) alphabetical order. 
+# (almost) alphabetical order. The meaning of most of these entries
+# is self-evident from their names, or from consulting the comment
+# block above that doucments the 'defined names' which must be present
+# in the input .xlsx file. When this is not the case, a description is
+# given below.
 #
 #   errors - string with text of error message(s) for any error(s) 
 #            encountered when reading the input .xlsx file.
 #            If this == '', processing found no errors.
+#   direct_salary_cell_col_ix
+#   direct_salary_cell_row_ix
+#   direct_salary_col_ix
+#   first_schedule_col_ix
+#   funding_list_bottom_row_ix
+#   funding_list_top_row_ix
+#   funding_source_name_col_ix
+#   last_schedule_col_ix
+#   last_used_schedule_col_ix - the index of the last data cell in the
+#                               schedule table that has been filled-in
+#                               by hatching and/or contains a milestone
+#   m1_col_ix
+#   milestone_label_col_ix
+#   milestone_name_col_ix
+#   milestones_list_first_row_ix
+#   num_sched_col_header_cells - the number of column header cells 
+#                                required in the output HTML table
+#                                for the schedule in the input .xlsx file
+#   num_sched_subdivisions - the number of subdivisions PER COLUMN HEADER
+#                            required in the output HTML table; legal
+#                            value can only be 3, 4, or 5
+#   odc_cell_col_ix
+#   odc_cell_row_ix
+#   odc_consultants_line_ix
+#   odc_dp_equipment_line_ix
+#   odc_office_equipment_line_ix
+#   odc_other_line_ix
+#   odc_printing_line_ix
+#   odc_travel_line_ix
+#   overhead_cell_col_ix
+#   overhead_cell_row_ix
+#   overhead_col_ix
+#   p1_col_ix
+#   p2_col_ix
+#   p3_col_ix
+#   p4_col_ix
+#   p5_col_ix
+#   project_name_cell_col_ix
+#   project_name_cell_row_ix
+#   sched_major_units - the 'major scheduling unit' used in the input .xlsx file;
+#                       legal value can only be 'Quarter', 'Month', or 'Week'
+#   sched_minor_units - the 'minor scheduling unit' implied by the major 
+#                       scheduling unit selected by the user; legal value 
+#                       can only be 'Months', 'Weeks', or 'Days'
+#   sp1_col_ix
+#   sp3_col_ix
+#   task_list_bottom_row_ix
+#   task_list_top_row_ix
+#   task_name_col_ix
+#   task_number_col_ix
+#   temp_col_ix
+#   total_col_ix
+#   total_cost_cell_col_ix
+#   total_cost_cell_row_ix
+#   total_cost_col_ix
+#   total_line_row_ix
+#   wb - the .xlsx workbook that was opened
+#   ws - the 'workscope_exhibits' worksheet
 #
-# ... MORE DOCUMENTED TBD HERE 
-#
-# 
 def initExcelFile(fullpath):
     # retval dictionary
     retval = {}
     retval['errors'] = ''
     
-    # Workbook MUST be opened with data_only parameter set to True.
+    # Workbook MUST be opened with the data_only parameter set to True.
     # This ensures that we read the computed value in cells containing a formula, not the formula itself.
     try:
         wb = openpyxl.load_workbook(fullpath, data_only=True)
