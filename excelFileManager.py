@@ -229,11 +229,11 @@ def get_last_used_sched_column(xlsInfo):
 def dump_xlsInfo(xlsInfo):
     l = []
     for item in xlsInfo:
-        l.append(i)
+        l.append(item)
     # end_for
     l.sort()
-    for i in l:
-       print i + ': ' + str(xlsInfo[i])
+    for item in l:
+       print item + ': ' + str(xlsInfo[item])
     # end_for()
 # end_def dump_xlsInfo()
 
@@ -266,7 +266,7 @@ def initExcelFile(fullpath):
         ws = wb['workscope_exhibits']
         retval['ws'] = ws
     except:
-        retval retval['errors'] += 'Failed to find workscope_exhibits worksheet.\n'
+        retval['errors'] += 'Failed to find workscope_exhibits worksheet.\n'
     # Collect row and column indices for cells of interest for Exhibit 2
     #
     try:
@@ -334,7 +334,7 @@ def initExcelFile(fullpath):
     try:
         retval['odc_other_line_ix'] = get_row_index(wb, 'odc_other_line')   
     except:
-        retval['errors'] += 'Failed to find odc_other_line_ix\n']
+        retval['errors'] += 'Failed to find odc_other_line_ix\n'
     # Rows containing info on funding source(s)
     try:
         retval['funding_list_top_row_ix'] = get_row_index(wb, 'funding_list_top')
