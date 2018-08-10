@@ -22,7 +22,7 @@
 # this code is neither particularly efficient nor particularly idiomatic Python. 
 #
 # Author: Benjamin Krepp
-# Date: 23 July - 8 August 2018
+# Date: 23-27 July, 30-31 July, 6-10 August 2018
 #   
 # Internals of this Module: Top-level Functions
 # =============================================
@@ -84,16 +84,15 @@ from excelFileManager import initExcelFile, get_column_index, get_row_index, get
 debug_flags = {}
 debug_flags['dump_sched_elements'] = False
 
-# Global pseudo-constants
-# *** TBD: Verify that the following should be a float value
-WEEKS_PER_MONTH = 52.0/12.0
-WEEKS_PER_QUARTER = 52/4
-BAR_UNIT_IN_POINTS = 34.6875
+# Global pseudo-constants:
+# Width of table HEADER cells in THE schedule table
+SCHED_HEADER_CELL_WITDH_12PX_BORDER = 33.9375
+SCHED_HEADER_CELL_WIDTH_24PX_BORDER = 16.59375
 
 # Gross global var in which we accumulate all HTML generated
 accumulatedHTML = ''
 
-# Append string to gross globabl variable accumulatedHTML 
+# Append string to gross global variable accumulatedHTML 
 def appendHTML(s):
     global accumulatedHTML
     # print s
@@ -150,7 +149,6 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
     t1 = '<td colspan="' + str(xlsInfo['num_sched_col_header_cells']) + ' '
     # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
     t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
-    # *** TBD: Why is this class set according to whether or not it's the first task (i.e., row)?
     if task_num == 1:
         t3 = 'class="firstSchedColCell">'
     else:
@@ -174,20 +172,19 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
     # We then merge the two lists, maintaining ascending chronological order.  
     # Having done this, we will then be in a position to generate the relevant HTML.
     
-    # Generate the list of 'bars'
+    # Build the list of 'bars'
     # Prep work: Generate a string of 0's and 1's indicating the cells in the schedule
     # bar chart that have been 'filled in' with the magic fill pattern 'gray125'.
     # Logically, we're creating a bit vector; it's implemented, however as a vector
     # of '0' and '1' characters in a string.
     my_pseudo_bv = ''
     ws = xlsInfo['ws']
-    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_used_schedule_col_ix']):
+    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_used_schedule_col_ix']+1):
         cell = ws.cell(task_row_ix, col)
         fill = cell.fill
         patternType = fill.patternType
         my_pseudo_bv += '1' if patternType == MAGIC_FILL_STYLE else '0'
     # end_for
-    
     # The list of 'bars'
     bars = []
     my_re = re.compile('1+')
@@ -208,9 +205,9 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
         bars.append(temp)
     # end_for
     
-    # Generate the list of 'milestones'
+    # Build the list of 'milestones'
     milestones = []
-    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_used_schedule_col_ix']):
+    for col in range(xlsInfo['first_schedule_col_ix'],xlsInfo['last_used_schedule_col_ix']+1):
         val = get_cell_contents(xlsInfo['ws'], task_row_ix, col)
         if str(val).isupper():
             # Debug:
@@ -227,19 +224,88 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
     # Combine 'bars' and 'milestones' into a single list, and sort the result 
     # on (1) the 'start' value and (2) the 'type'.
     # N.B. 'bar' appears before 'milestone' in the sort order for 'type', 
-    #      so thereby ensure that the HTML for task bars are generated before
+    #      and so thereby ensures that the HTML for task bars are generated before
     #      the HTML for any milesones occuring within them.
     big_list = bars + milestones
     big_list_sorted = sorted(big_list, key=lambda x: (x['start'], x['type']))
-    # Debug:
-    if debug_flags['dump_sched_elements'] == True:
+
+    if debug_flags['dump_sched_elements']:
         for thing in big_list_sorted:
             print '*** ' + thing['type'] + ' ' + str(thing['start']) + ' ' + str(thing['end']) + ' ' + thing['milestone']
         # end_if
     # end_for
     
+    # The schedule table BODY in the output HTML does not consist of "real" <td> cells.
+    # Rather, we generate <div>s whose left offset and width are determined by:
+    #     1. the index of the first cell of the relevant schedule item in the INPUT .xlsx file
+    #     2. the number of cells for the relevant schedule item in the INPUT .xlsx file
+    #     3. the width (in pixels) of the schedule table HEADER cells in the output HTML
+    #     4. the number of minor schedule units per major schedule unit in the input .xlsx file
+    
+    if xlsInfo['num_sched_col_header_cells'] <= 12:
+        hdr_cell_width = SCHED_HEADER_CELL_WITDH_12PX_BORDER 
+    else:
+        hdr_cell_width = SCHED_HEADER_CELL_WIDTH_24PX_BORDER
+    # end_if
 
-    # Generation of the <divs> for the schedule bars and milestones goes here.
+    # Width of 'virtual' cell for one subdivision of the major schedule unit
+    minor_cell_width  = hdr_cell_width / float(xlsInfo['num_sched_subdivisions'])
+    
+    # Debug
+    print 'Header cell width = ' + str(hdr_cell_width)
+    print 'Minor cell width = ' + str(minor_cell_width)
+    
+
+    # Generation of the <divs> for the schedule bars and milestones
+    for item in big_list_sorted:
+        left = float(item['start'] - xlsInfo['first_schedule_col_ix']) *  minor_cell_width
+        if item['type'] == 'bar':
+            # print 'left = ' + str(left)
+            num_subdivisions = item['end'] - item['start'] + 1
+            width = num_subdivisions * minor_cell_width
+            
+            # Debug
+            print '*** Task #' + str(task_num) +  ' start: ' + str(item['start']) + ' end: ' + str(item['end']) + ' ' + ' left = ' + str(left) + ' width = ' + str(width)
+            
+            t1 = '<div class="schedElemDiv">'
+            t2 = '<div class="scheduleBar" style="'
+            t2 += 'left:' + str(left) + 'px;'
+            t2 += 'width:' + str(width) + 'px'
+            t2 += '">'
+            # Stuff for screen reader
+            t3 = '<div class="overflowHiddenTextDiv">'
+            t4 = 'CONTENTS TBD'
+            t5 = '</div>'
+            # End of stuff for screen reader
+            # Close <div> with class=schedBar 
+            t6 = '</div>'
+            # Close <div> with class=schedElemDiv
+            t7 = '</div>'
+            s = t1 + t2 + t3 + t4 + t5 + t6 + t7
+            appendHTML(s)
+        else:
+            # Must be a 'milestone'
+            # Debug
+            print '*** Milestone: ' + item['milestone'] + ' start: ' + str(item['start']) +  ' ' + ' left = ' + str(left)
+            t1 = '<div class="schedElemDiv">'
+            t2 = '<div class="deliverableCodeDiv" style="'
+            t2 += 'left:' + str(left) + 'px;">'
+            # Firt bunch of stuff for screen reader
+            t3 = '<div class="overflowHiddenTextDiv">Deliverable</div>'
+            # The name of the milestone/deliverable
+            t4 = item['milestone']
+            
+            # Second bunch of stuff for screen reader
+            t5 = '<div class="overflowHiddenTextDiv">'
+            t6 = 'ANOTHER PLACEHOLDER'
+            t7 = '</div>'
+            
+            # Close the remaining two <div>salary
+            t8 = '</div></div>'
+            s = t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8
+            appendHTML(s)
+        # end_if
+    #end_for
     
     
     # Close seond <td> in row
@@ -338,9 +404,9 @@ def gen_ex1_schedule_table(xlsInfo):
     # the numbers of the MAJOR schedule units actually used in the schedule
     
     if xlsInfo['num_sched_col_header_cells'] <= 12:
-        sched_header_cell_class_string = ' class="scheduleColHdr24PixBorder" '
-    else:
         sched_header_cell_class_string = ' class="scheduleColHdr12PixBorder" '
+    else:
+        sched_header_cell_class_string = ' class="scheduleColHdr24PixBorder" '
     # end_if
     
     for i in range(1,xlsInfo['num_sched_col_header_cells']+1):
