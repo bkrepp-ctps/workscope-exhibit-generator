@@ -9,8 +9,8 @@
 class stringAccumulator:
     def __init__(self):
         self.accum = ''
-    def append(self, x):
-        self.accum += x
+    def append(self, s):
+        self.accum += s
     def get(self):
         return self.accum
     def re_init(self):
@@ -32,13 +32,10 @@ def functional_stringAccumulator():
     my_vars['accum'] = ''
     def append(s):
         my_vars['accum'] += s
-    # end_def
     def get():
         return my_vars['accum']
-    # end_def
     def re_init():
-        my_vars['accum'] = ''
-    # end_def    
+        my_vars['accum'] = ''   
     retval = {}
     retval['append'] = append
     retval['get'] = get
