@@ -247,7 +247,7 @@ def dump_xlsInfo(xlsInfo):
 #
 #   errors - string with text of error message(s) for any error(s) 
 #            encountered when reading the input .xlsx file.
-#            If this == '', processing found no errors.
+#            If 'errors' == '', processing found no errors.
 #   direct_salary_cell_col_ix
 #   direct_salary_cell_row_ix
 #   direct_salary_col_ix

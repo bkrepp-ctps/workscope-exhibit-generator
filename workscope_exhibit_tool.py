@@ -15,14 +15,15 @@
 #
 # This script is a 'port' of a CFML application to Python. The code has been written
 # in such a way as to make correlation of a given section of Python code that produces
-# an HTML fragment as easy as possible  to correlate with the corresponding segment 
-# of CFML code. As there is no functional spec for the original CFML application 
-# (the CFML code IS the functional spec for the app, so to speak), this was essential
-# in order to ensure functional correctness and debug-ability. As a side-effect of this,
-# this code is neither particularly efficient nor particularly idiomatic Python. 
+# an HTML fragment as easy as possible to correlate with the HTML output produced by
+# the CFML application and the relevant segment of CFML code  As there is no functional 
+# spec for the CFML application, this was essential in order to ensure functional 
+# correctness and debug-ability. Please note that as a consequence of this, 
+# the code is neither particularly efficient nor particularly idiomatic Python. 
+# It was, however, intended to be as easy to understand by a 'newbie' as possible.
 #
 # Author: Benjamin Krepp
-# Date: 23-27 July, 30-31 July, 6-10 August 2018
+# Date: 23-27 July, 30-31 July, 6-10 August 2018, 13 August 2018
 #   
 # Internals of this Module: Top-level Functions
 # =============================================
@@ -80,52 +81,17 @@ from bs4 import BeautifulSoup
 from excelFileManager import initExcelFile, get_column_index, get_row_index, get_cell_contents, \
                              get_last_used_sched_column, MAGIC_FILL_STYLE, \
                              dump_xlsInfo
+from stringAccumulator import stringAccumulator
 
 debug_flags = {}
 debug_flags['dump_sched_elements'] = False
 
 # Global pseudo-constants:
 # Width of table HEADER cells in THE schedule table
-SCHED_HEADER_CELL_WITDH_12PX_BORDER = 33.9375
-SCHED_HEADER_CELL_WIDTH_24PX_BORDER = 16.59375
-
-# Gross global var in which we accumulate all HTML generated
-accumulatedHTML = ''
-
-# Append string to gross global variable accumulatedHTML 
-def appendHTML(s):
-    global accumulatedHTML
-    # print s
-    accumulatedHTML += s
-# end_def appendHTML()
-
-######################################################################################
-# I would really like to manage the collection of HTML using the following function,
-# but have decided against this (at least for the time being) in order to make the
-# code easier to understand for people who are unfamiliar with closures in general 
-# (and closures in Python 2.x in particular) and functional programming.
-# If you know what you're doing, modifying the code to use "functional_output_manager" 
-# will be straightforward. I leave "functional_output_manager" here as a teaser for
-# those who might enjoy the opportunity to work with functional code. 
-# -- BK 7/27/2018
-def functional_output_manager():
-    my_vars = {}
-    my_vars['accumulatedHTML'] = ''
-    def append(s):
-        my_vars['accumulatedHTML'] += s
-    # end_def
-    def clear():
-        my_vars['accumulatedHTML'] = ''
-    # end_def
-    def get():
-        return my_vars['accumulatedHTML']
-    # end_def
-    retval = {}
-    retval['append'] = append
-    retval['clear'] = clear
-    retval['get'] = get
-    return retval
-# end_def output_manager()
+SCHED_HEADER_CELL_WITDH_IN_PTS_12PX_BORDER = 33.9375
+SCHED_HEADER_CELL_WITDH_IN_PX_12PX_BORDER = (SCHED_HEADER_CELL_WITDH_IN_PTS_12PX_BORDER * 1.3333)
+SCHED_HEADER_CELL_WIDTH_IN_PTS_24PX_BORDER = 16.59375
+SCHED_HEADER_CELL_WIDTH_IN_PX_24PX_BORDER = (SCHED_HEADER_CELL_WIDTH_IN_PTS_24PX_BORDER * 1.3333)
 
 
 # Person weeks are formatted as a floating point number with one digit of precision.
@@ -144,9 +110,14 @@ def format_dollars(dollars):
 
 
 
-def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
+def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
+    global SCHED_HEADER_CELL_WITDH_IN_PX_12PX_BORDER, SCHED_HEADER_CELL_WIDTH_IN_PX_24PX_BORDER
     global debug_flags
-    t1 = '<td colspan="' + str(xlsInfo['num_sched_col_header_cells']) + ' '
+    
+    print '*** SCHED_HEADER_CELL_WIDTH_IN_PX_12PX_BORDER = ' + str(SCHED_HEADER_CELL_WITDH_IN_PX_12PX_BORDER)
+    print '*** SCHED_HEADER_CELL_WIDTH_IN_PX_24PX_BORDER = ' + str(SCHED_HEADER_CELL_WIDTH_IN_PX_24PX_BORDER)
+    
+    t1 = '<td colspan="' + str(xlsInfo['num_sched_col_header_cells']) + '" '
     # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
     t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
     if task_num == 1:
@@ -155,7 +126,7 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
         t3 = 'class="schedColCell">'
     # end_if
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # The guts of 2nd <td> in schedule row.
     # This may contain an arbitrary number of chart 'bars' and an arbitrary number
@@ -243,9 +214,9 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
     #     4. the number of minor schedule units per major schedule unit in the input .xlsx file
     
     if xlsInfo['num_sched_col_header_cells'] <= 12:
-        hdr_cell_width = SCHED_HEADER_CELL_WITDH_12PX_BORDER 
+        hdr_cell_width = SCHED_HEADER_CELL_WITDH_IN_PX_12PX_BORDER
     else:
-        hdr_cell_width = SCHED_HEADER_CELL_WIDTH_24PX_BORDER
+        hdr_cell_width = SCHED_HEADER_CELL_WITDH_IN_PX_24PX_BORDER
     # end_if
 
     # Width of 'virtual' cell for one subdivision of the major schedule unit
@@ -282,7 +253,7 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
             # Close <div> with class=schedElemDiv
             t7 = '</div>'
             s = t1 + t2 + t3 + t4 + t5 + t6 + t7
-            appendHTML(s)
+            htmlAcc.append(s)
         else:
             # Must be a 'milestone'
             # Debug
@@ -303,20 +274,20 @@ def gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo):
             # Close the remaining two <div>salary
             t8 = '</div></div>'
             s = t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8
-            appendHTML(s)
+            htmlAcc.append(s)
         # end_if
     #end_for
     
     
     # Close seond <td> in row
     s = '</td>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex1_task_tr_2nd_td()
 
 # The following routine is under development
-def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo):
+def gen_ex1_task_tr(htmlAcc, task_num, task_row_ix, xlsInfo):
     s = '<tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
       
     # First <td> in row: task number and task name
     t1 = '<td id="row' + str(task_num) + '" headers="ex1taskTblHdr" '
@@ -326,63 +297,63 @@ def gen_ex1_task_tr(task_num, task_row_ix, xlsInfo):
         t2 = 'class="taskTblCell">'
     # end_if
     s = t1 + t2
-    appendHTML(s)
+    htmlAcc.append(s)
     
     t1 = '<div class="taskNumDiv">'
     # *** TBD: Fetch task number from cell in  Excel file rather than using task_num
     t2 = str(task_num) + '.'
     t3 = '</div>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     
     t1 = '<div class="taskNameDiv">'
     #  *** TBD: This currently gets the task name from its cell in the cost table
     t2 = get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['task_name_col_ix'])
     t3 = '</div>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     # Close first <td> in row
     s = '</td>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Second <td> in row: schedule bar(s) and deliverable(s), (if any)
-    gen_ex1_task_tr_2nd_td(task_num, task_row_ix, xlsInfo)
+    gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo)
     
     # Close <tr>
     s = '</tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex1_task_tr()
 
-def gen_ex1_schedule_table_body(xlsInfo):
+def gen_ex1_schedule_table_body(htmlAcc, xlsInfo):
     # Open <tbody>
     s = '<tbody>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Write the <tr>s in the table body
     i = 0
     for task_row_ix in range(xlsInfo['task_list_top_row_ix']+1,xlsInfo['task_list_bottom_row_ix']):
         i = i + 1
-        gen_ex1_task_tr(i, task_row_ix, xlsInfo)
+        gen_ex1_task_tr(htmlAcc, i, task_row_ix, xlsInfo)
     # end_for
     # Close <tbody>
     s = '</tbody>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Close <table>
     s = '</table>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex1_schedule_table_body()
 
-def gen_ex1_schedule_table(xlsInfo):
+def gen_ex1_schedule_table(htmlAcc, xlsInfo):
     s = '<table id="ex1Tbl"'
     s += 'summary="Breakdown of schedule by tasks in column one and calendar time ranges and deliverable dates in column two.">'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     s = '<thead>'
     # First row of column header, first column: 'Task'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<th id="ex1taskTblHdr" class="colTblHdr" rowspan="2"><br>Task</th>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # First row of table header, second column: name of MAJOR time unit used in table,
     # i.e., either 'Quarter', 'Month' or 'Week'
@@ -393,13 +364,13 @@ def gen_ex1_schedule_table(xlsInfo):
     t3 = xlsInfo['sched_major_units']
     t4 = '</th>'
     s = t1 + t2 +t3 + t4
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Second row of table header: the numbers of the individual MAJOR time units in schedule
     s = '<tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # The <th>s for the second row of headers,
     # the numbers of the MAJOR schedule units actually used in the schedule
     
@@ -415,33 +386,33 @@ def gen_ex1_schedule_table(xlsInfo):
         t3 = sched_header_cell_class_string + ' abbr="Schedule range">'
         t4 = str(i) + '</th>'
         s = t1 + t2 + t3 + t4
-        appendHTML(s)
+        htmlAcc.append(s)
     # end_for
     
     # Close the 2nd row of column headers
     s = '</tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Close table header
     s = '</thead>'
-    appendHTML(s)
+    htmlAcc.append(s)
   
     # Call subordinate routine to do the heavy lifting: generate the <table> body for Exhibit 1
-    gen_ex1_schedule_table_body(xlsInfo)
+    gen_ex1_schedule_table_body(htmlAcc, xlsInfo)
 # end_def gen_ex1_schedule_table()
 
 
-def gen_ex1_milestone_div(xlsInfo):
+def gen_ex1_milestone_div(htmlAcc, xlsInfo):
     s = '<div id="milestoneDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div id="milestoneHdrDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = 'Products/Milestones'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div id="milestoneListDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     # The general form of the 'list' (but it's not an HTML <list>) of deliverables is:
     #   <span class="label"> LETTER_CODE_FOR_DELIVERABLE </span> NAME_OF_DELIVERABLE <br>
     # Example:
@@ -467,107 +438,107 @@ def gen_ex1_milestone_div(xlsInfo):
         t4 = get_cell_contents(xlsInfo['ws'], milestone_ix, xlsInfo['milestone_name_col_ix'])
         t5 = '<br>'
         s = t1 + t2 + t3 + t4 + t5
-        appendHTML(s)
+        htmlAcc.append(s)
     # end_for
     
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex1_milestone_div()
 
 
-def gen_exhibit_1_body(xlsInfo):
+def gen_exhibit_1_body(htmlAcc, xlsInfo):
     pass
     s = '<body style="text-align:center;padding:0pt;margin:0pt;">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div id="exhibit1">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div class="exhibitPageLayoutDiv1"><div class="exhibitPageLayoutDiv2">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<h1>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = 'Exhibit 1<br>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = 'ESTIMATED SCHEDULE<br>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Project name
     s = str(get_cell_contents(xlsInfo['ws'], xlsInfo['project_name_cell_row_ix'], xlsInfo['project_name_cell_col_ix']))
     s = s + '<br>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</h1>'
-    appendHTML(s)
+    htmlAcc.append(s)
     #
-    gen_ex1_schedule_table(xlsInfo)
-    gen_ex1_milestone_div(xlsInfo)
+    gen_ex1_schedule_table(htmlAcc, xlsInfo)
+    gen_ex1_milestone_div(htmlAcc, xlsInfo)
 # end_def 
 
 # TBD: Combine this and gen_exhibit_2_body into a single, parameterized,  routine.
-def gen_exhibit_1_initial_boilerplate():
+def gen_exhibit_1_initial_boilerplate(htmlAcc):
     s = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<title>CTPS Work Scope Exhibit 1</title>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<link rel="stylesheet" type="text/css" href="./ctps_work_scope_print.css">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</head>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_exhibit_1_initial_boilerplate()
 
 # Shares 100% code with gen_exhibit_1_final_boilerplate. 
 # TBD: Combine these two routines.
 # Write the final "boilerplate" HTML for Exhibit 1: the closing </body> and </html> tags.
-def gen_exhibit_1_final_boilerplate():
+def gen_exhibit_1_final_boilerplate(htmlAcc):
     s = '</body>' 
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</html>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_exhibit_1_final_boilerplate()
 
 
-def gen_exhibit_1(xlsInfo):
-    gen_exhibit_1_initial_boilerplate()
-    gen_exhibit_1_body(xlsInfo)
-    gen_exhibit_1_final_boilerplate()
+def gen_exhibit_1(htmlAcc, xlsInfo):
+    gen_exhibit_1_initial_boilerplate(htmlAcc)
+    gen_exhibit_1_body(htmlAcc, xlsInfo)
+    gen_exhibit_1_final_boilerplate(htmlAcc)
 # end_def gen_exhibit_1()
 
 # Write initial "boilerplate" HTML for Exhibit 2.
 # This includes all content from DOCTYPE, the <html> tag, and everything in the <head>.
-def gen_exhibit_2_initial_boilerplate():
+def gen_exhibit_2_initial_boilerplate(htmlAcc):
     s = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<title>CTPS Work Scope Exhibit 2</title>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<link rel="stylesheet" type="text/css" href="./ctps_work_scope_print.css">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</head>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_exhibit_2_initial_boilerplate()
 
 # This writes the final "boilerplate" HTML for Exhibit 2: the closing </body> and </html> tags.
-def gen_exhibit_2_final_boilerplate():
+def gen_exhibit_2_final_boilerplate(htmlAcc):
     s = '</body>' 
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</html>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_exhibit_2_final_boilerplate()
 
-def gen_ex2_direct_salary_div(xlsInfo):
+def gen_ex2_direct_salary_div(htmlAcc, xlsInfo):
     s = '<div id="directSalaryDiv" class="barH2">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<h2>Direct Salary and Overhead</h2>'
-    appendHTML(s)
+    htmlAcc.append(s)
     t1 = '<div class="h2AmtDiv">'
     t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['direct_salary_cell_row_ix'], xlsInfo['direct_salary_cell_col_ix']))
     t3 = '</div>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex2_direct_salary_div()
 
 ######################################################################################################
@@ -576,13 +547,13 @@ def gen_ex2_direct_salary_div(xlsInfo):
 # In order to expedite development/prototyping, however, it is currently defined here at scope-0.
 # When the tool has become stable, move it within the def of salary_cost_table_div.
 #
-def gen_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
+def gen_task_tr(htmlAcc, task_num, task_row_ix, xlsInfo, real_cols_info):
     # Open <tr> element
     t1 = '<tr id='
     tr_id = 'taskHeader' + str(task_num)
     t2 = tr_id + '>'
     s = t1 + t2
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # <td> for task number and task name
     # Note: This contains 3 divs organized thus: <div> <div></div> <div></div> </div>
@@ -593,27 +564,27 @@ def gen_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
         t2 = 'class="taskTblCell">'
     # end_if
     s = t1 + t2 
-    appendHTML(s)
+    htmlAcc.append(s)
     # Open outer div
     s = '<div class="taskTblCellDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     # First inner div
     t1 = '<div class="taskNumDiv">'
     t2 = get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['task_number_col_ix'])
     t3 = '</div>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     # Second inner div
     t1 = '<div class="taskNameDiv">'
     t2 = get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['task_name_col_ix'])
     t3 = '</div>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     # Close outer div, and close <td>
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</td>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Generate the <td>s for all the salary grades used in this work scope exhibit
     for col_info in real_cols_info:
@@ -622,7 +593,7 @@ def gen_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
         t3 = format_person_weeks(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo[col_info['col_ix']]))
         t4 = '</td>'
         s = t1 + t2 + t3 + t4
-        appendHTML(s)
+        htmlAcc.append(s)
     # end_for
     
     # Generate the <td>s for 'Total [person weeks]', 'Direct Salary', 'Overhead', and 'Total Cost'.
@@ -632,47 +603,47 @@ def gen_task_tr(task_num, task_row_ix, xlsInfo, real_cols_info):
     t2 = format_person_weeks(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['total_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     #
     # Direct Salary
     t1 = '<td headers="' + tr_id + ' salaryTblHdr" class="rightPaddedTblCell">'
     t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['direct_salary_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     #
     # Overhead
     t1 = '<td headers="' + tr_id + ' overheadTblHdr" class="rightPaddedTblCell">'
     t2 = '$' +  format_dollars(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['overhead_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)       
+    htmlAcc.append(s)       
     #
     # Total Cost
     t1 = '<td headers="' + tr_id + ' totalTblHdr" class="rightPaddedTblCell">'
     t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], task_row_ix, xlsInfo['total_cost_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)       
+    htmlAcc.append(s)       
     
     s = '</tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_task_tr()
 
 ############################################################################
 # Top-level routine for generating HTML for Exhibit 2 salary cost table div.
 # Calls end_def gen_ex2_task_tr as a helper function.
-def gen_ex2_salary_cost_table_div(xlsInfo):
+def gen_ex2_salary_cost_table_div(htmlAcc, xlsInfo):
     s = '<div class="costTblDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<table id="ex2Tbl" summary="Breakdown of staff time by task in column one, expressed in person weeks for each implicated pay grade in the middle columns,'
     s = s + 'together with resulting total salary and associated overhead costs in the last columns.">'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # The table header (<thead>) element and its contents
     #
     s = '<thead>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # <thead> contents
     # Most of this is invariant bolierplate. The exceptions are the number of "real" columns and the overhead rate.
@@ -680,9 +651,9 @@ def gen_ex2_salary_cost_table_div(xlsInfo):
     # First row of <thead> contents
     # 
     s = '<tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<th id="taskTblHdr" class="colTblHdr" rowspan="2" scope="col"><br>Task</th>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # 
     # Get actual number of columns to use for "colspan".
     # Determine which columns contain non-zero data: it's sufficent to check the total row for this.
@@ -722,24 +693,24 @@ def gen_ex2_salary_cost_table_div(xlsInfo):
     t2 = n_real_cols
     t3 = '" abbr="Person Weeks" scope="colgroup">Person-Weeks</th>'
     s = t1 + str(t2) + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<th id="salaryTblHdr" class="colTblHdr" rowspan="2" scope="col" abbr="Direct Salary">Direct<br>Salary</th>'
-    appendHTML(s)
+    htmlAcc.append(s)
     t1 = '<th id="overheadTblHdr" class="colTblHdr" rowspan="2" scope="col" abbr="Overhead">Overhead<br>'
     t2 = get_cell_contents(xlsInfo['ws'], xlsInfo['overhead_cell_row_ix'], xlsInfo['overhead_cell_col_ix'])
     t2 = t2.replace('@ ', '')
     t3 = '</th>'
     s = t1 + t2 + t3 
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<th id="totalTblHdr" class="colTblHdr" rowspan="2" scope="col" abbr="Total Cost">Total<br>Cost</th>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Second row of <thead> contents
     #
     s = '<tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Column headers for all columns for job classifications used in this work scope
     #
     for col_info in real_cols_info:
@@ -751,22 +722,22 @@ def gen_ex2_salary_cost_table_div(xlsInfo):
         t6 = col_info['col_header_with_dash']
         t7 = '</th>'
         s = t1 + t2 + t3 + t4 + t5 + t6 + t7
-        appendHTML(s)
+        htmlAcc.append(s)
     # end_for
     # Second: column header for Total column
     s = '<th id="personWeekTotalTblHdr" scope="col">Total</th>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Close <thead> 
     s = '</thead>'
-    appendHTML(s)   
+    htmlAcc.append(s)   
     
     # The table body <tbody> element and its contents.
     #
     s = '<tbody>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # <tbody> contents.
     #
@@ -774,27 +745,27 @@ def gen_ex2_salary_cost_table_div(xlsInfo):
     i = 0
     for task_row_ix in range(xlsInfo['task_list_top_row_ix']+1,xlsInfo['task_list_bottom_row_ix']):
         i = i + 1
-        gen_task_tr(i, task_row_ix, xlsInfo, real_cols_info)
+        gen_task_tr(htmlAcc, i, task_row_ix, xlsInfo, real_cols_info)
     # end_for
     
     # The 'Total' row
     #
     s = '<tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<td headers="taskTblHdr" id="totalRowTblHdr" class="taskTblCell" scope="row" abbr="Total All Tasks">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div class="taskTblCellDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Total row, task number column (empty)
     s = '<div class="taskNumDiv"> </div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Total row, "task name" colum - which contains the pseudo task name 'Total'
     s = '<div class="taskNameDiv">Total</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</td>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Total row: columns for salary grades used in this workscope
     for col_info in real_cols_info:
@@ -802,7 +773,7 @@ def gen_ex2_salary_cost_table_div(xlsInfo):
         t2 = format_person_weeks(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo[col_info['col_ix']]))
         t3 = '</td>'
         s = t1 + t2 + t3
-        appendHTML(s)
+        htmlAcc.append(s)
     # end_for
     
     # Total row: Total [person weeks] column
@@ -810,130 +781,130 @@ def gen_ex2_salary_cost_table_div(xlsInfo):
     t2 = format_person_weeks(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['total_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     # Total row, direct salary column
     t1 = '<td id="directSalaryTotalRowTblCell" headers="totalRowTblHdr salaryTblHdr" class="totalRowTblCell">'
     t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['direct_salary_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     # Total row, overhead column
     t1 = '<td id="overheadTotalRowTblCell" headers="totalRowTblHdr overheadTblHdr" class="totalRowTblCell">'
     t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['overhead_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     # Total row, total cost column
     t1 = '<td id="totalTotalRowTblCell" headers="totalRowTblHdr totalTblHdr" class="totalRowTblCell">'
     t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_line_row_ix'], xlsInfo['total_cost_col_ix']))
     t3 = '</td>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     # Close <tr> for Total row
     s = '</tr>'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Close <tbody>, <table>, and <div>
     s = '</tbody>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</table>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex2_salary_cost_table_div()
 
-def gen_ex2_other_direct_costs_div(xlsInfo):
+def gen_ex2_other_direct_costs_div(htmlAcc, xlsInfo):
     s = '<div id="otherDirectDiv" class="barH2">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<h2>Other Direct Costs</h2>'
-    appendHTML(s)
+    htmlAcc.append(s)
     t1 = '<div class="h2AmtDiv">'
     odc_total = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_cell_row_ix'], xlsInfo['odc_cell_col_ix'])
     t2 = '$' + format_dollars(odc_total)
     t3 = '</div>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Write the divs for the specific other direct costs and a wrapper div around all of them (even if there are none.)
     #
     # <div> for wrapper
     s = '<div class="costTblDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     
     # Utiltiy function to write HTML for one kind of 'other direct cost.'
-    def gen_odc(name, cost):
+    def gen_odc(htmlAcc, name, cost):
         s = '<div class="otherExpDiv">'
-        appendHTML(s)
+        htmlAcc.append(s)
         s = '<div class="otherExpDescDiv">' + name + '</div>'
-        appendHTML(s)
+        htmlAcc.append(s)
         s = '<div class="otherExpAmtDiv">' + '$' + format_dollars(cost) + '</div>'
-        appendHTML(s)
+        htmlAcc.append(s)
         s = '</div>'
-        appendHTML(s)
+        htmlAcc.append(s)
     # end_def gen_odc()
     
     # Travel
     travel = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_travel_line_ix'], xlsInfo['total_cost_col_ix'])
     if travel != 0:
-        gen_odc('Travel', travel)
+        gen_odc(htmlAcc, 'Travel', travel)
     
     # General office equipment
     general_office_equipment = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_office_equipment_line_ix'], xlsInfo['total_cost_col_ix'])
     if general_office_equipment != 0:
-        gen_odc('General Office Equipment', general_office_equipment)
+        gen_odc(htmlAcc, 'General Office Equipment', general_office_equipment)
     
     # Data processing equipment
     dp_equipment = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_dp_equipment_line_ix'], xlsInfo['total_cost_col_ix'])
     if dp_equipment != 0:
-        gen_odc('Data Processing Equipent', dp_equipment)
+        gen_odc(htmlAcc, 'Data Processing Equipent', dp_equipment)
     
     # Consultant(s)
     consultants = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_consultants_line_ix'], xlsInfo['total_cost_col_ix'])
     if consultants != 0:
-        gen_odc('Consultants', consultants)
+        gen_odc(htmlAcc, 'Consultants', consultants)
     
     # Printing
     printing = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_printing_line_ix'], xlsInfo['total_cost_col_ix'])
     if printing != 0:
-        gen_odc('Printing', printing)
+        gen_odc(htmlAcc, 'Printing', printing)
     
     # Other 
     other = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_other_line_ix'], xlsInfo['total_cost_col_ix'])
     if other != 0:
         desc = get_cell_contents(xlsInfo['ws'], xlsInfo['odc_other_line_ix'], xlsInfo['task_name_col_ix'])
-        gen_odc(desc, other)
+        gen_odc(htmlAcc, desc, other)
     
     # </div> for wrapper
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex2_other_direct_costs_div()
 
-def gen_ex2_total_direct_costs_div(xlsInfo):
+def gen_ex2_total_direct_costs_div(htmlAcc, xlsInfo):
     s = '<div id="totalDirectDiv" class="barH2">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<h2>TOTAL COST</h2>'
-    appendHTML(s)
+    htmlAcc.append(s)
     t1 = '<div class="h2AmtDiv">'
     t2 = '$' + format_dollars(get_cell_contents(xlsInfo['ws'], xlsInfo['total_cost_cell_row_ix'], xlsInfo['total_cost_cell_col_ix']))
     t3 = '</div>'
     s = t1 + t2 + t3
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex2_total_direct_costs_div()
 
-def gen_ex2_funding_div(xlsInfo):
+def gen_ex2_funding_div(htmlAcc, xlsInfo):
     s = '<div id="fundingDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div id="fundingHdrDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = 'Funding'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div id="fundingListDiv">'
-    appendHTML(s)
+    htmlAcc.append(s)
     #
     kount = 0
     for fs_row in range(xlsInfo['funding_list_top_row_ix']+1,xlsInfo['funding_list_bottom_row_ix']):
@@ -944,12 +915,12 @@ def gen_ex2_funding_div(xlsInfo):
             s = s + '<br>'
         # end_if
         s = s + get_cell_contents(xlsInfo['ws'], fs_row, xlsInfo['task_name_col_ix'])
-        appendHTML(s)
+        htmlAcc.append(s)
     # end_for       
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</div>'
-    appendHTML(s)
+    htmlAcc.append(s)
 # end_def gen_ex2_funding_div()
 
 # This writes the HTML for the entire <body> of Exhibit 2, including:
@@ -959,37 +930,37 @@ def gen_ex2_funding_div(xlsInfo):
 #   the div for the salary cost table
 #   the div forthe "Other Direct Costs" line
 #   the div for funding source(s)
-def gen_exhibit_2_body(xlsInfo):
+def gen_exhibit_2_body(htmlAcc, xlsInfo):
     s = '<body style="text-align:center;margin:0pt;padding:0pt;">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div id="exhibit2">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<div class="exhibitPageLayoutDiv1"><div class="exhibitPageLayoutDiv2">'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '<h1>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = 'Exhibit 2<br>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = 'ESTIMATED COST<br>'
-    appendHTML(s)
+    htmlAcc.append(s)
     # Project name
     s = str(get_cell_contents(xlsInfo['ws'], xlsInfo['project_name_cell_row_ix'], xlsInfo['project_name_cell_col_ix']))
     s = s + '<br>'
-    appendHTML(s)
+    htmlAcc.append(s)
     s = '</h1>'
-    appendHTML(s)
+    htmlAcc.append(s)
     #
-    gen_ex2_direct_salary_div(xlsInfo)
-    gen_ex2_salary_cost_table_div(xlsInfo)
-    gen_ex2_other_direct_costs_div(xlsInfo)
-    gen_ex2_total_direct_costs_div(xlsInfo)
-    gen_ex2_funding_div(xlsInfo)
+    gen_ex2_direct_salary_div(htmlAcc, xlsInfo)
+    gen_ex2_salary_cost_table_div(htmlAcc, xlsInfo)
+    gen_ex2_other_direct_costs_div(htmlAcc, xlsInfo)
+    gen_ex2_total_direct_costs_div(htmlAcc, xlsInfo)
+    gen_ex2_funding_div(htmlAcc, xlsInfo)
 # end_def gen_exhibit_2_body()
 
-def gen_exhibit_2(xlsInfo):
-    gen_exhibit_2_initial_boilerplate()
-    gen_exhibit_2_body(xlsInfo)
-    gen_exhibit_2_final_boilerplate()
+def gen_exhibit_2(htmlAcc, xlsInfo):
+    gen_exhibit_2_initial_boilerplate(htmlAcc)
+    gen_exhibit_2_body(htmlAcc, xlsInfo)
+    gen_exhibit_2_final_boilerplate(htmlAcc)
 # end_def gen_exhibit_2()
 
 # Pretty-formats HTML and saves it to specified filename.
@@ -1005,7 +976,7 @@ def write_html_to_file(html, filename):
 
 # Main driver routine - this function does NOT launch a GUI.
 def main(fullpath):
-    global accumulatedHTML # Yeech
+    htmlAcc = stringAccumulator()
     t1 = os.path.split(fullpath)
     in_dir = t1[0]
     in_fn = t1[1]
@@ -1015,17 +986,17 @@ def main(fullpath):
     
     # Collect 'navigation' information from input .xlsx file
     xlsInfo = initExcelFile(fullpath)
-    if xlsInfo['errors'] != '':
+    if xlsInfo['errors'] == '':
         # Generate Exhibit 1 HTML, and save it to disk
         # NOTE: gen_exhibit_1() is currently a work-in-progress
-        accumulatedHTML = ''
-        gen_exhibit_1(xlsInfo)
-        write_html_to_file(accumulatedHTML, ex_1_out_html_fn)
+
+        gen_exhibit_1(htmlAcc, xlsInfo)
+        write_html_to_file(htmlAcc.get(), ex_1_out_html_fn)
     
         # Generate Exhibit 2 HTML, and save it to disk
-        accumulatedHTML = ''
-        gen_exhibit_2(xlsInfo)
-        write_html_to_file(accumulatedHTML, ex_2_out_html_fn)
+        htmlAcc.re_init()
+        gen_exhibit_2(htmlAcc, xlsInfo)
+        write_html_to_file(htmlAcc.get(), ex_2_out_html_fn)
     else:
         print 'HTML generation aborted.\nErrors found when reading ' + fullpath + ':\n'
         print xlsInfo['errors']        
