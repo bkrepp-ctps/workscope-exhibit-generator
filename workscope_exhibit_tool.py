@@ -14,9 +14,9 @@
 #      PLEASE READ THE DOCUMENTION FOR THE excelFileManager MODULE THOROUGHLY!
 #
 # This script is a 'port' of a CFML application to Python. The code has been written
-# in such a way as to make correlation of a given section of Python code that produces
-# an HTML fragment as easy as possible to correlate with the HTML output produced by
-# the CFML application and the relevant segment of CFML code  As there is no functional 
+# in such a way as to make it as simple as possible to correlate a given section of 
+# Python code that generates an HTML fragment with the HTML output produced by the
+# CFML application and the relevant segment of CFML code  As there is no functional 
 # spec for the CFML application, this was essential in order to ensure functional 
 # correctness and debug-ability. Please note that as a consequence of this, 
 # the code is neither particularly efficient nor particularly idiomatic Python. 
@@ -29,6 +29,35 @@
 # =============================================
 #
 # main - main driver routine for this program
+#
+# gen_exhibit_1 - driver routine for generating Exhibit 1;
+#                 calls gen_exhibit_1_initial_boilerplate,
+#                 gen_exhibit_1_body, and gen_exhibit_1_final_boilerplate
+#
+# gen_exhibit_1_initial_boilerplate - generates boilerplate HTML at beginning of
+#                                     Exhibit 1
+#
+# gen_exhibit_1_final_boilerplate - generates boilerplate HTML at end of Exhibit 1
+#
+# gen_exhibit_1_body - driver routine for producing HTML for the body of Exhibit 1;
+#                      calls gen_ex1_schedule_table and  gen_ex1_milestone_div
+#
+# gen_ex1_schedule_table - driver routine for generating HTML for the schedule
+#                          <table> in Exhibit 1
+#
+# gen_ex1_schedule_table_body - driver routine for generating the <body> of the
+#                               HTML <table> schedule in Exhibit 1; calls
+#                               gen_ex1_task_tr
+#
+# gen_ex1_task_tr - driver routeine for generating the <tr> for a given task in 
+#                   the schedule in Exhibit 1; calls gen_ex1_task_tr_2nd_td
+#
+# gen_ex1_task_tr_2nd_td - routine responsible for generating the second <td>
+#                          in the <tr> for a given task in the schedule in 
+#                          Exhibit 1. This routine bears close reading.
+#
+# gen_ex1_milestone_div - generates HTML for the milestones/deliverables <div>
+#                         of Exhibit 1
 #
 # gen_exhibit_2 - driver routine for generating Exhibit 2;
 #                 calls gen_exhibit_2_initial_boilerplate,
@@ -70,6 +99,12 @@
 #                  string with zero decimal places of precision (i.e., an integer),
 #                  using the ',' symbol as the thousands delimeter
 #
+# col_ix_to_temporal_string - maps a column index in the schedule portion of the input 
+#                             .xlsx file to a text string that expresses the point in 
+#                             time indicated by the input column index in terms of the 
+#                             major- and minor-units of the schedule.
+#                             Example: Map column index X to "Month 3, Week 1"
+#
 ###############################################################################
 
 import os
@@ -87,7 +122,7 @@ debug_flags = {}
 debug_flags['dump_sched_elements'] = False
 
 # Global pseudo-constants:
-# Width of table HEADER cells in THE schedule table
+# Width of table HEADER cells in the schedule table
 SCHED_HEADER_CELL_WITDH_IN_PTS_12PX_BORDER = 33.9375
 SCHED_HEADER_CELL_WITDH_IN_PX_12PX_BORDER = (SCHED_HEADER_CELL_WITDH_IN_PTS_12PX_BORDER * 1.3333)
 SCHED_HEADER_CELL_WIDTH_IN_PTS_24PX_BORDER = 16.59375
@@ -101,22 +136,41 @@ def format_person_weeks(person_weeks):
 # end_def format_person_weeks()
 
 # Dollars are formatted as a floating point number with NO digits of precision,
-# i.e., as an integer, with commas as the thousands delimiter.
+# i.e., as an integer, but also with commas as the thousands delimiter.
 # Note: This function does NOT prepend a '$' symbol to the string returned.
 def format_dollars(dollars):
     retval = '{0:,.0f}'.format(dollars)
     return retval
 # end_def format_dollars()
 
-
+# Map a column index in the schedule portion of the input .xlsx file to
+# a text string that expresses the point in time indicated by the 
+# input column index in terms of the major- and minor-units of the schedule.
+# Example: Map column index X to "Month 3, Week 1"
+def col_ix_to_temporal_string(col_ix, xlsInfo):
+    retval = ''
+    maj_unit = xlsInfo['sched_major_units']
+    min_unit = xlsInfo['sched_minor_units']
+    num_subdivisions = xlsInfo['num_sched_subdivisions']
+    
+    # The trick  here is to remember that after 'unbiasing' the input column index
+    # by the index of the first column in the schedule, the result will be 0-based,
+    # whereas human beings think of the first <time unit> of a schedule as <time unit> 1.    
+    start_abs = (col_ix - xlsInfo['first_schedule_col_ix']) + num_subdivisions
+    maj_abs = start_abs / num_subdivisions
+    # The same principle applies to the minor schedule units
+    min_abs = (start_abs % num_subdivisions) + 1
+    retval = maj_unit + ' ' + str(maj_abs) + ', ' + min_unit + ' ' + str(min_abs)
+        
+    # Debug
+    # print '*** retval: ' + retval
+    return retval
+# end_def_col_ix_to_temporal_string()
 
 def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
     global SCHED_HEADER_CELL_WITDH_IN_PX_12PX_BORDER, SCHED_HEADER_CELL_WIDTH_IN_PX_24PX_BORDER
     global debug_flags
-    
-    print '*** SCHED_HEADER_CELL_WIDTH_IN_PX_12PX_BORDER = ' + str(SCHED_HEADER_CELL_WITDH_IN_PX_12PX_BORDER)
-    print '*** SCHED_HEADER_CELL_WIDTH_IN_PX_24PX_BORDER = ' + str(SCHED_HEADER_CELL_WIDTH_IN_PX_24PX_BORDER)
-    
+
     t1 = '<td colspan="' + str(xlsInfo['num_sched_col_header_cells']) + '" '
     # *** TBD: 'timeUnit1' seems to ALWAYS be incuded as a header. Is this right?
     t2 = 'headers ="row' + str(task_num) + ' timeUnit1" '
@@ -135,7 +189,7 @@ def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
     #
     # In order to this, we build (1) a list of 'bars' and (2) a list of 'milestones,'
     # both in ascending chronological (i.e., column) order. We use a common dictionary 
-    # data structure for each element of these two lists:
+    # data structure for the elements of these two lists:
     #     'type'      : 'bar' or 'milestone'
     #     'start'     : start column index
     #     'end'       : end column index   ('start' == 'end' for milestones)
@@ -163,7 +217,7 @@ def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
     for match in my_iter:
         my_span = match.span()
         # To get the actual column indices of the first and last cell, bias the indices
-        # in the bitvector by the index of the first column in the schedule table
+        # in the (logical) bitvector by the index of the first column in the schedule table
         start = my_span[0] + xlsInfo['first_schedule_col_ix']
         end = my_span[1] + xlsInfo['first_schedule_col_ix'] - 1
         # Debug:
@@ -223,20 +277,18 @@ def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
     minor_cell_width  = hdr_cell_width / float(xlsInfo['num_sched_subdivisions'])
     
     # Debug
-    print 'Header cell width = ' + str(hdr_cell_width)
-    print 'Minor cell width = ' + str(minor_cell_width)
+    # print 'Header cell width = ' + str(hdr_cell_width)
+    # print 'Minor cell width = ' + str(minor_cell_width)
     
-
     # Generation of the <divs> for the schedule bars and milestones
     for item in big_list_sorted:
         left = float(item['start'] - xlsInfo['first_schedule_col_ix']) *  minor_cell_width
         if item['type'] == 'bar':
-            # print 'left = ' + str(left)
             num_subdivisions = item['end'] - item['start'] + 1
             width = num_subdivisions * minor_cell_width
             
             # Debug
-            print '*** Task #' + str(task_num) +  ' start: ' + str(item['start']) + ' end: ' + str(item['end']) + ' ' + ' left = ' + str(left) + ' width = ' + str(width)
+            # print '*** Task #' + str(task_num) +  ' start: ' + str(item['start']) + ' end: ' + str(item['end']) + ' ' + ' left = ' + str(left) + ' width = ' + str(width)
             
             t1 = '<div class="schedElemDiv">'
             t2 = '<div class="scheduleBar" style="'
@@ -245,19 +297,20 @@ def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
             t2 += '">'
             # Stuff for screen reader
             t3 = '<div class="overflowHiddenTextDiv">'
-            t4 = 'CONTENTS TBD'
-            t5 = '</div>'
+            t4 = 'From ' + col_ix_to_temporal_string(item['start'], xlsInfo)
+            t5 = ' to ' + col_ix_to_temporal_string(item['end'], xlsInfo) + '.'
+            t6 = '</div>'
             # End of stuff for screen reader
             # Close <div> with class=schedBar 
-            t6 = '</div>'
-            # Close <div> with class=schedElemDiv
             t7 = '</div>'
-            s = t1 + t2 + t3 + t4 + t5 + t6 + t7
+            # Close <div> with class=schedElemDiv
+            t8 = '</div>'
+            s = t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8
             htmlAcc.append(s)
         else:
             # Must be a 'milestone'
             # Debug
-            print '*** Milestone: ' + item['milestone'] + ' start: ' + str(item['start']) +  ' ' + ' left = ' + str(left)
+            # print '*** Milestone: ' + item['milestone'] + ' start: ' + str(item['start']) +  ' ' + ' left = ' + str(left)
             t1 = '<div class="schedElemDiv">'
             t2 = '<div class="deliverableCodeDiv" style="'
             t2 += 'left:' + str(left) + 'px;">'
@@ -266,25 +319,23 @@ def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
             # The name of the milestone/deliverable
             t4 = item['milestone']
             
-            # Second bunch of stuff for screen reader
+            # Second bunch of stuff for screen reader - text of when the milestone/deliverable will arrive
             t5 = '<div class="overflowHiddenTextDiv">'
-            t6 = 'ANOTHER PLACEHOLDER'
+            t6 = 'Delivered by ' + col_ix_to_temporal_string(item['start'], xlsInfo) + '.'
             t7 = '</div>'
             
-            # Close the remaining two <div>salary
+            # Close the remaining two <div>s
             t8 = '</div></div>'
             s = t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8
             htmlAcc.append(s)
         # end_if
     #end_for
     
-    
     # Close seond <td> in row
     s = '</td>'
     htmlAcc.append(s)
 # end_def gen_ex1_task_tr_2nd_td()
 
-# The following routine is under development
 def gen_ex1_task_tr(htmlAcc, task_num, task_row_ix, xlsInfo):
     s = '<tr>'
     htmlAcc.append(s)
@@ -300,7 +351,7 @@ def gen_ex1_task_tr(htmlAcc, task_num, task_row_ix, xlsInfo):
     htmlAcc.append(s)
     
     t1 = '<div class="taskNumDiv">'
-    # *** TBD: Fetch task number from cell in  Excel file rather than using task_num
+    # *** TBD: Fetch task number from cell in Excel file rather than using task_num
     t2 = str(task_num) + '.'
     t3 = '</div>'
     s = t1 + t2 + t3
@@ -988,11 +1039,8 @@ def main(fullpath):
     xlsInfo = initExcelFile(fullpath)
     if xlsInfo['errors'] == '':
         # Generate Exhibit 1 HTML, and save it to disk
-        # NOTE: gen_exhibit_1() is currently a work-in-progress
-
         gen_exhibit_1(htmlAcc, xlsInfo)
         write_html_to_file(htmlAcc.get(), ex_1_out_html_fn)
-    
         # Generate Exhibit 2 HTML, and save it to disk
         htmlAcc.re_init()
         gen_exhibit_2(htmlAcc, xlsInfo)
@@ -1002,3 +1050,10 @@ def main(fullpath):
         print xlsInfo['errors']        
     # end_if
 # end_def main()
+
+# If this module has been invoked from the command line, the following statement
+# ensures that the function "main" is called with the first parameter that was 
+# passed on the command line, e.g.,
+#     c:\Python27\python.exe -m workscope_exhibit_generator full_path_to_xlsx_file
+if __name__== "__main__":
+    main(sys.argv[1])
