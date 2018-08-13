@@ -1,0 +1,565 @@
+@charset "utf-8";
+/* CSS Document */
+body	{
+	background-color: rgb(245,245,220);
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	font-weight: normal;
+}
+form	{
+	margin: 0px;
+	padding: 0px;
+}
+label	{
+	display: inline-block;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 3px 0px;
+}
+h1	{
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	font-weight: bold;
+	width: auto;
+	margin: 0pt;
+}
+h2	{
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	font-weight: bold;
+	margin: 0;
+	float: left;
+}
+table	{
+	border-width: 0px;
+	border-collapse: collapse;
+	width: 100%;
+	padding-right: 81px;
+}
+th	{
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	font-weight: normal;
+}
+td	{
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	font-weight: normal;
+	text-align: right;
+}
+button	{
+	padding: 0;
+}
+#status	{
+	position: absolute;
+	background-color: rgb(192,255,192);
+}
+#titleDiv2	{
+	width: 100%;
+	text-align: center;
+}
+#titleDiv	{
+	display:inline-block;
+}
+#titleTbl	{
+	width: auto;
+}
+#titleTblCell	{
+	text-align: left;
+}
+#titleText	{
+	font-family: serif;
+	font-size: 1.5em;
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
+}
+#overallInstructionDiv	{
+	font-weight: bold;
+	color: rgb(208,128,128);
+	margin-bottom: 2em;
+}
+#password_message	{
+	display: inline-block;
+	margin-bottom: 1em;
+}
+#work_scopes	{
+	min-width: 730px;
+}
+#exhibits	{
+	text-align: center;
+}
+#exhibit1	{
+	display: inline-block;
+	text-align: left;
+	width: auto;
+	padding: 18pt;
+	border: solid thin black;
+	background-color: white;
+	zoom: 1;
+	*display: inline;
+}
+#exhibit2	{
+	display: inline-block;
+	text-align: left;
+	width: auto;
+	margin-top: 6pt;
+	padding: 18pt;
+	border: solid thin black;
+	background-color: white;
+	zoom: 1;
+	*display: inline;
+}
+#directSalaryDiv	{
+}
+#taskTblHdr	{
+	text-align: center;
+}
+#ex1Tbl	{
+	width: auto;
+}
+#ex1taskTblHdr	{
+	width: auto;
+}
+#personWeekTblHdr	{
+	text-align: center;
+}
+#personWeekTotalTblHdr	{
+	text-align: right;
+	border-bottom: solid black 1px;
+	width: 81px;
+	padding-right: 4px;
+}
+#salaryTblHdr	{
+	text-align: right;
+	width: 81px;
+	padding-right: 4px;
+}
+#overheadTblHdr	{
+	text-align: right;
+	width: 81px;
+	padding-right: 4px;
+}
+#totalTblHdr	{
+	text-align: right;
+	width: 70px;
+	padding-right: 4px;
+}
+#totalRowTblHdr	{
+	padding-top: 12.75pt;
+}
+#personWeeksTotalRowTblCell	{
+	padding-right: 4px;
+}
+#directSalaryTotalRowTblCell	{
+	padding-right: 4px;
+}
+#overheadTotalRowTblCell	{
+	padding-right: 4px;
+}
+#totalTotalRowTblCell	{
+	padding-right: 4px;
+}
+#fundingDiv {
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	/*font-style: italic;*/
+}
+#fundingHdrDiv	{
+	font-weight: bold;
+}
+#fundingListDiv	{
+	margin-left: 25px;
+}
+#ex2Tbl	{
+	width: auto;
+}
+#milestoneDiv	{
+	width: auto;
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+}
+#milestoneHdrDiv	{
+	width: auto;
+}
+#milestoneListDiv	{
+	width: auto;
+	margin-left: 26px;
+	padding-left: 21px;
+}
+#milestoneListDiv span.label	{
+	float: left;
+	clear: left;
+	width: 21px;
+}
+.workScopeNameInput	{
+	width: 60%;
+	margin: 0em 2em 0em 0em;
+}
+.dateInput	{
+	width: 5em;
+}
+.authorInput	{
+	width: 20em;
+	margin: 0em 2em 0em 0em;
+}
+.rateSelect	{
+	margin: 0em 0em 0em 0em;
+}
+.fundingTextArea	{
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	vertical-align: baseline;
+	width: 20em;
+}
+.password_error	{
+	text-decoration: blink;
+	color: red;
+}
+.work_scope_rec_left_col	{
+	text-align: center;
+	min-width: 91px;
+	width: 15%;
+	text-align: left;
+	display: inline-table;
+	zoom: 1;
+	*display: inline;
+}
+.work_scope_rec_right_col	{
+	text-align: justify;
+	min-width: 600px;
+	width: 84%;
+	display: inline-table;
+	vertical-align: top;
+	zoom: 1;
+	*display: inline;
+}
+.linksAsButtons	{
+	padding: 0.1em 0.5em 0.1em 0.5em;
+	background-color: whitesmoke;
+	border: thin solid black;
+	color: black;
+	text-decoration: none;
+}
+.addNewHeadingDiv	{
+	margin: 3px 0px 0px 0px;
+	padding: 0px;
+}
+.textbox	{
+	background-color: rgb(245,245,220)
+}
+.boxedRow	{
+	padding: 15px;
+	margin: 15px;
+	border: solid white 5px;
+	background-color: rgb(221,221,198);
+}
+.indentedGroupDiv	{
+	margin-left: 120px;
+}
+.rateEditSpanDiv	{
+	width: auto;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateEditDiv	{
+	position: absolute;
+	text-align: center;
+	font-weight: bold;
+	background-color: rgb(245,245,220);
+	margin: 1px;
+	padding: 5px 8px 5px 5px;
+	border: solid black 1px;
+	width: auto;
+}
+.rateTableHeaderDiv	{
+	width: auto;
+}
+.rateTableDelHeaderDiv	{
+	width: 20px;
+	font-weight: bold;
+	text-align: center;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableColHeaderDiv	{
+	width: 80px;
+	font-weight: bold;
+	text-align: center;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableDescHeaderDiv	{
+	width: 400px;
+	font-weight: bold;
+	text-align: center;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableSalaryGroupHeaderDiv	{
+	width: auto;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableSalaryHeaderDiv	{
+	font-weight: bold;
+	text-align: center;
+}
+.rateTableSalaryColHeaderDiv	{
+	width: 60px;
+	font-weight: bold;
+	text-align: center;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableDelColDiv	{
+	width: 20px;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableColDiv	{
+	width: 80px;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableColDiv input	{
+	width: 70px;
+	margin: 2px 4px 2px 4px;
+}
+.rateTableDescColDiv	{
+	width: 400px;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableDescColDiv input	{
+	width: 390px;
+	margin: 2px 4px 2px 4px;
+}
+.rateTableSalaryColDiv	{
+	width: 60px;
+	display: inline-block;
+	zoom: 1;
+	*display: inline;
+}
+.rateTableSalaryColDiv input	{
+	text-align: right;
+	width: 50px;
+	margin: 2px 4px 2px 4px;
+}
+.taskTitleHeading	{
+	display: inline-block;
+	width: 250px;
+	text-align: center;
+	font-weight: bold;
+	margin: 2px;
+	border: rgb(245,245,220) solid 2px;
+	border-collapse: separate;
+	zoom: 1;
+	*display: inline;
+}
+.taskHoursHeading	{
+	display: inline-block;
+	width: 30px;
+	text-align: center;
+	font-weight: bold;
+	margin: 2px;
+	border: rgb(245,245,220) solid 2px;
+	border-collapse: separate;
+	padding: 0px;
+	zoom: 1;
+	*display: inline;
+	*margin: 4px;
+}.taskTitle	{
+	display: inline-block;
+	width: 250px;
+	margin: 2px;
+	padding: 0px;
+	zoom: 1;
+	*display: inline;
+}
+.taskHours	{
+	width: 30px;
+	text-align: right;
+	margin: 2px;
+	border-collapse: separate;
+	padding: 0px;
+}
+.otherCostInputDiv	{
+	width: auto;
+	display: inline-block;
+	text-align: center;
+	margin-right: 20px;
+	zoom: 1;
+	*display: inline;
+}
+.otherCostInput	{
+	width: 80px;
+	text-align: right;
+	margin: 0px;
+}
+.weekInput	{
+	width: 2em;
+	margin: 0em 2em 0em 0em;
+}
+.codeInput	{
+	width: 1.5em;
+	margin: 0em 2em 0em 0em;
+}
+.deliverableInput	{
+	width: 20em;
+}
+.exhibitPageLayoutDiv1	{
+	max-width: 720pt;
+}
+.exhibitPageLayoutDiv2	{
+}
+.barH2	{
+	background-color: rgb(224,224,224);
+	border: solid black 1px;
+	width: auto;
+	padding: 0pt 3pt 0pt 3pt;
+	text-align: right;
+}
+.h2AmtDiv	{
+	display: inline-block;
+	font-family: Arial Narrow, Helvetica, sans-serif;
+	font-size: 13px;
+	font-weight: bold;
+	text-align: right;
+	width: 9%;
+	zoom: 1;
+	*display: inline;
+}
+.costTblDiv	{
+	padding-right: 81px;
+	width: auto;
+}
+.colTblHdr	{
+	border: solid black 1pt;
+	text-align: center;
+	padding: 0px;
+}
+.personWKTblHdr	{
+	text-align: right;
+	width: 41px;
+	border-bottom: solid black 1px;
+}
+.firstTaskTblCell	{
+	text-align: left;
+	padding: 9px 8px 0px 0px;
+}
+.taskTblCell	{
+	text-align: left;
+	padding: 2px 8px 0px 0px;
+	width: auto;
+}
+.lastTaskTblCell	{
+	text-align: left;
+	border-bottom: solid black 1px;
+	padding: 2px 8px 0px 0px;
+}
+.firstSchedColCell	{
+	text-align: left;
+	padding: 9px 0px 0px 0px;
+	vertical-align: top;
+}
+.schedColCell	{
+	text-align: left;
+	padding: 2px 0px 0px 0px;
+	vertical-align: top;
+}
+.lastSchedColCell	{
+	text-align: left;
+	vertical-align: top;
+	border-bottom: solid black 1px;
+	padding: 2px 0px 0px 0px;
+}
+.rightPaddedTblCell	{
+	padding-right: 4px;
+}
+.totalRowTblCell	{
+	padding-top: 16px;
+}
+.otherExpDiv	{
+	display: table;
+	width: 100%;
+}
+.otherExpDescDiv	{
+	display: table-cell;
+	padding: 1.3pt 6pt 0pt 21.5pt;
+	width: auto;
+}
+.otherExpAmtDiv	{
+	display: table-cell;
+	text-align: right;
+	padding: 1.3pt 3pt 0pt 0pt;
+}
+.taskNumDiv	{
+	width: 17pt;
+	padding-right: 4.5pt;
+	text-align: right;
+	display: table-cell;
+}
+.taskNameDiv	{
+	width: auto;
+	display: table-cell;
+}
+.scheduleColHdr12PntBorder	{
+	text-align: center;
+	width: 33.6875pt;
+	border: solid black 1pt;
+	padding: 0pt;
+}
+.scheduleColHdr12PixBorder	{
+	text-align: center;
+	width: 33.9375pt;
+	border: solid black 1pt;
+	padding: 0pt;
+}
+.scheduleColHdr24PntBorder	{
+	text-align: center;
+	width: 16.34375pt;
+	border: solid black 1pt;
+	padding: 0pt;
+}
+.scheduleColHdr24PixBorder	{
+	text-align: center;
+	width: 16.59375pt;
+	border: solid black 1pt;
+	padding: 0pt;
+}
+.schedElemDiv	{
+	position: absolute;
+	height: 18px;
+}
+.deliverableCodeDiv	{
+	position: relative;
+	width: 1en;
+	height: 13px;
+	margin-bottom: 0px;
+}
+.overflowHiddenTextDiv	{
+	display: inline-block;
+	width: 0pt;
+	height: 10pt;
+	overflow: hidden;
+	zoom: 1;
+	position: absolute;
+    left: 1000px;
+}
+.scheduleBar	{
+	position:relative;
+	overflow: hidden;
+	color: rgb(224,224,224);
+	height: 13px;
+	margin-bottom: 0px;
+	border: solid black 1px;
+	background-color: rgb(224,224,224);
+}

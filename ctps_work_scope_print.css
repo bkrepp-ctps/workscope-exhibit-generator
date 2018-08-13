@@ -1,0 +1,334 @@
+@charset "utf-8";
+/* CSS Document */
+@media print	{
+	#printInstructionDiv	{
+		/*display: none;*/
+	}
+	#printInstructionDiv	{
+		width: 100%;
+		text-align: left;
+	}
+}
+@media screen	{
+	#printInstructionDiv	{
+		background-color: rgb(255,240,240);
+		width: 100%;
+		text-align: left;
+	}
+	#printInstructionInnerDiv	{
+		padding: 1em 2em 1em 2em;
+	}
+}
+@media print, screen {
+	#exhibit1	{
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		line-height: 15pt;
+		display: inline-block;
+		zoom: 1;
+		*display: inline;
+	}
+	#exhibit1 h1	{
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		font-weight: bold;
+		line-height: 15pt;
+		width: auto;
+		margin: 0pt;
+	}
+	#exhibit1 th	{
+		font-weight: normal;
+	}
+	#exhibit2	{
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		line-height: 15pt;
+		display: inline-block;
+		zoom: 1;
+		*display: inline;
+	}
+	#exhibit2 h1	{
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		font-weight: bold;
+		line-height: 15pt;
+		width: auto;
+		margin: 0pt;
+	}
+	#exhibit2 h2	{
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		font-weight: bold;
+		margin: 0;
+		padding-left: 3pt;
+		/*float: left;*/
+		display: table-cell;
+	}
+	#exhibit2 th	{
+		font-weight: normal;
+	}
+	#directSalaryDiv	{
+		margin-top: 14.75pt;
+	}
+	#taskTblHdr	{
+		text-align: center;
+	}
+	#ex1Tbl	{
+		width: auto;
+		margin-top: 12pt;
+		margin-bottom: 12pt;
+		border-width: 0px;
+		border-collapse: collapse;
+		padding-right: 81px;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		line-height: 15pt;
+		font-weight: normal;
+	}
+	#ex1taskTblHdr	{
+		width: auto;
+	}
+	#personWeekTblHdr	{
+		text-align: center;
+	}
+	#personWeekTotalTblHdr	{
+		text-align: right;
+		border-bottom: solid black 1pt;
+		width: 45pt;
+		padding-right: 3pt;
+	}
+	#salaryTblHdr	{
+		text-align: right;
+		width: 55pt;
+		padding-right: 3pt;
+	}
+	#overheadTblHdr	{
+		text-align: right;
+		width: 55pt;
+		padding-right: 3pt;
+	}
+	#totalTblHdr	{
+		text-align: right;
+		width: 55pt;
+		padding-right: 3pt;
+	}
+	#totalRowTblHdr	{
+		padding-top: 8.25pt;
+	}
+	#personWeeksTotalRowTblCell	{
+	}
+	#directSalaryTotalRowTblCell	{
+	}
+	#overheadTotalRowTblCell	{
+	}
+	#totalTotalRowTblCell	{
+	}
+	#fundingDiv {
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		/*font-style: italic;*/
+	}
+	#fundingHdrDiv	{
+		font-weight: bold;
+	}
+	#fundingListDiv	{
+		margin-left: 25px;
+	}
+	#ex2Tbl	{
+		border-width: 0px;
+		border-collapse: collapse;
+		padding-right: 0px;
+		width: auto;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12pt;
+		line-height: 15pt;
+		font-weight: normal;
+		text-align: right;
+	}
+	#taskHeader1 td	{
+		padding-top: 7pt;
+	}
+	#milestoneDiv	{
+		width: auto;
+	}
+	#milestoneHdrDiv	{
+		width: auto;
+	}
+	#milestoneListDiv	{
+		width: auto;
+		margin-left: 21.5pt;
+		padding_left: 17pt;
+	}
+	#milestoneListDiv span.label	{
+		float: left;
+		clear: left;
+		width: 17pt;
+	}
+	.exhibitPageLayoutDiv1	{
+		text-align: left;
+		width: auto;
+		max-width: 720pt;
+		zoom: 1;
+		display:table;
+		height:540pt;
+		*display: inline;
+	}
+	.exhibitPageLayoutDiv2	{
+		display:table-cell;
+		vertical-align:middle;
+	}
+	.barH2	{
+		background-color: rgb(224,224,224);
+		border: solid black 1pt;
+		width: 100%;
+		/*padding: 0pt 3pt 0pt 3pt;
+		text-align: right;*/
+		display: table;
+		margin-top: 11.25pt;
+		margin-bottom: 11.25pt;
+		-webkit-print-color-adjust:exact;
+	}
+	.h2AmtDiv	{
+		/*display: inline-block;*/
+		display: table-cell;
+		font-weight: bold;
+		text-align: right;
+		padding-right: 3pt;
+		/*width: 9%;*/
+		zoom: 1;
+		*display: inline;
+	}
+	.costTblDiv	{
+		padding-right: 0pt;
+		width: auto;
+	}
+	.colTblHdr	{
+		border: solid black 1pt;
+		text-align: center;
+		padding: 0pt;
+	}
+	.personWKTblHdr	{
+		text-align: right;
+		width: 35pt;
+		border-bottom: solid black 1pt;
+	}
+	.firstTaskTblCell	{
+		text-align: left;
+		padding: 7pt 6pt 0pt 0pt;
+	}
+	.taskTblCell	{
+		text-align: left;
+		padding: 1.3pt 6pt 0pt 0pt;
+		width: auto;
+	}
+	.taskTblCellDiv	{
+		display: table;
+	}
+	.lastTaskTblCell	{
+		text-align: left;
+		border-bottom: solid black 1pt;
+		padding: 1.3pt 6pt 11pt 0pt;
+	}
+	.firstSchedColCell	{
+		text-align: left;
+		padding: 7pt 0pt 0pt 0pt;
+		vertical-align: bottom;
+	}
+	.schedColCell	{
+		text-align: left;
+		padding: 1.3pt 0pt 0pt 0pt;
+		vertical-align: bottom;
+	}
+	.lastSchedColCell	{
+		text-align: left;
+		vertical-align: bottom;
+		border-bottom: solid black 1pt;
+		padding: 1.3pt 0pt 10.5pt 0pt;
+	}
+	.rightPaddedTblCell	{
+		padding-right: 3pt;
+		vertical-align: bottom;
+	}
+	.totalRowTblCell	{
+		padding-top: 8.25pt;
+		padding-right: 3pt;
+	}
+	.otherExpDiv	{
+		display: table;
+		width: 100%;
+	}
+	.otherExpDescDiv	{
+		display: table-cell;
+		padding: 1.3pt 6pt 0pt 21.5pt;
+		width: auto;
+	}
+	.otherExpAmtDiv	{
+		display: table-cell;
+		text-align: right;
+		padding: 1.3pt 3pt 0pt 0pt;
+	}
+	.taskNumDiv	{
+		width: 17pt;
+		padding-right: 4.5pt;
+		text-align: right;
+		display: table-cell;
+	}
+	.taskNameDiv	{
+		width: auto;
+		display: table-cell;
+	}
+	.scheduleColHdr12PntBorder	{
+		text-align: center;
+		width: 33.6875pt;
+		border: solid black 1pt;
+		padding: 0pt;
+	}
+	.scheduleColHdr12PixBorder	{
+		text-align: center;
+		width: 33.9375pt;
+		border: solid black 1pt;
+		padding: 0pt;
+	}
+	.scheduleColHdr24PntBorder	{
+		text-align: center;
+		width: 16.34375pt;
+		border: solid black 1pt;
+		padding: 0pt;
+	}
+	.scheduleColHdr24PixBorder	{
+		text-align: center;
+		width: 16.59375pt;
+		border: solid black 1pt;
+		padding: 0pt;
+	}
+	.schedElemDiv	{
+		position: absolute;
+		height: 17.5pt;
+	}
+	.deliverableCodeDiv	{
+		position: relative;
+		top: -16pt;
+		width: 1em;
+		height: 12pt;
+		margin-bottom: 0px;
+	}
+	.overflowHiddenTextDiv	{
+		display: inline-block;
+		width: 0pt;
+		height: 12pt;
+		overflow: hidden;
+		zoom: 1;
+		position: absolute;
+        left: 1000px;
+	}
+	.scheduleBar	{
+		position:relative;
+		top: -16pt;
+		overflow: hidden;
+		height: 13pt;
+		margin-bottom: 0px;
+		border: solid black 1pt;
+		background-color: rgb(224,224,224);
+		-webkit-print-color-adjust:exact;
+	}
+}

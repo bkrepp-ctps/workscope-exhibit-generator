@@ -4,10 +4,11 @@
 #   This module was written to run under Python 2.7.x
 #
 # Author: Benjamin Krepp
-# Date: 10 August 2018
+# Date: 10, 13 August 2018
 
 class stringAccumulator:
-    accum = ''
+    def __init__(self):
+        self.accum = ''
     def append(self, x):
         self.accum += x
     def get(self):
