@@ -84,10 +84,9 @@
 # gen_ex2_funding_div - generates div with list of funding source(s)
 #
 # gen_ex2_salary_cost_table_div - generates the div containing the salary cost table;
-#                                 calls gen_task_tr. This is the driver routine
-#                                 for most of the work done by this program.
+#                                 calls gen_task_tr. 
 #
-# gen_task_tr - generates row for a given task in the work scope
+# gen_task_tr - generates row for a given task in the salary cost table
 #
 # Internals of this Module: Utility Functions
 # ===========================================
@@ -331,7 +330,7 @@ def gen_ex1_task_tr_2nd_td(htmlAcc, task_num, task_row_ix, xlsInfo):
         # end_if
     #end_for
     
-    # Close seond <td> in row
+    # Close second <td> in row
     s = '</td>'
     htmlAcc.append(s)
 # end_def gen_ex1_task_tr_2nd_td()
