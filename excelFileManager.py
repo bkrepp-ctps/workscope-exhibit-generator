@@ -75,6 +75,9 @@
 #                       printing; only the row index of this cell is used
 #   odc_other_line - any cell on line containing Ohter Direct Costs: other;
 #                    only the row index of this cell is used
+#   first_schedule_column - any cell in first column of the schedule exhibit
+#                           that may contain real schedule data; only the
+#                           column index of this cell is used
 #   last_schedule_column - any cell in the column that is one column beyond
 #                          the last 'real' column in the schedule table;
 #                          only the column index of this cell is used
