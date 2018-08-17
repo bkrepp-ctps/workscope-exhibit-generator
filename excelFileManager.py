@@ -10,7 +10,7 @@
 # The code in this module previously resided in 'workscope_exhibit_tool.py'
 #
 # Author: Benjamin Krepp
-# Date: 23-27 July, 30-31 July, 6-10 August 2018
+# Date: 23-27 July, 30-31 July, 6-10 August, 17 August 2018
 #
 # Requirements on the input .xlsx spreadsheet
 # ===========================================
@@ -24,65 +24,66 @@
 # 1. The worksheet containing the workscope exhibits MUST be named 'workscope_exhibits'.
 #    Other worksheets may be present; their contents are ignored by this script.
 #
-# 2. These 'defined names' MUST be present in the workbook and be defined as folllows:
+# 2. These 'defined names' MUST be present in the workbook and be defined as described
+#    below: (the following list is in alphabetical order)
 #
-#   project_name_cell - cell containing the project's name
 #   direct_salary_cell - cell containing the total direct salary and overhead
+#   direct_salary_column - cost table header cell containg the string
+#                          'Salary' (2nd line of 'Direct Salary')
+#   first_schedule_column - any cell in first column of the schedule exhibit
+#                           that may contain real schedule data; only the
+#                           column index of this cell is used
+#   funding list_bottom - any cell in line immediately following list of funding
+#                         sources; only the row index of this cell is used
+#   funding list_top - any cell in line immediately preceeding list of funding
+#                      sources; only the row index of this cell is used
+#   last_schedule_column - any cell in the column that is one column beyond
+#                          the last 'real' column in the schedule table;
+#                          only the column index of this cell is used
+#   m1_column -    cost table header cell containing the text 'M-1'
 #   odc_cell - cell containing the total of other direct costs
+#   odc_consultants_line - any cell on line containing Other Direct Costs:
+#                          consultants; only the row index of this cell is used
+#   odc_dp_equipment_line - any cell on line containing Other Direct Costs:
+#                           data processing equipment; only the row index of 
+#                           this cell is used
+#   odc_office_equipment_line - any cell on line containing Other Direct Costs:
+#                               general office equipment; only the row index of 
+#                               this cell is used
+#   odc_other_line - any cell on line containing Ohter Direct Costs: other;
+#                    only the row index of this cell is used
+#   odc_printing_line - any cell on line containing Other Direct Costs:
+#                       printing; only the row index of this cell is used
+#   odc_travel_line - any cell on line containing Other Direct Costs: travel;
+#                     only the row index of this cell is used
+#   overhead_cell -   ditto; used when we want to access the cell itself
+#   overhead_column - cost table header cell containing the overhead
+#                     rate (as a string); used when we want to access the column
+#   p1_column -    cost table header cell containing the text 'P-1'
+#   p2_column -    cost table header cell containing the text 'P-2'
+#   p3_column -    cost table header cell containing the text 'P-3'
+#   p4_column -    cost table header cell containing the text 'P-4' 
+#   p5_column -    cost table header cell containing the text 'P-5'
+#   project_name_cell - cell containing the project's name
+#   sched_major_units_cell - cell containing the 'major units' (which may be
+#                       Quarters, Months, or Weeks) used to express the schedule
+#   sp1_column -   cost table header cell containing the text 'SP-1'
+#   sp3_column -   cost table header cell containing the text 'SP-3'
 #   total_cost_cell - cell containing the total cost of the project
 #   task_list_top - any cell in line immediately preceeding list of tasks;
 #                   only the row index of this cell is used
 #   task_list_bottom - any cell in line immediately following list of tasks;
 #                      only the row index of this cell is used
-#   funding list_top - any cell in line immediately preceeding list of funding
-#                      sources; only the row index of this cell is used
-#   funding list_bottom - any cell in line immediately following list of funding
-#                         sources; only the row index of this cell is used
 #   task_number_column - any cell in column containing the task numbers in
 #                        the cost table; only the column index of this cell is used
 #   task_name_column - any cell in column containint the task name in the 
 #                      cost table; only the column index of this cell is used
-#   m1_column -    cost table header cell containing the text 'M-1'
-#   p5_column -    cost table header cell containing the text 'P-5'
-#   p4_column -    cost table header cell containing the text 'P-4' 
-#   p3_column -    cost table header cell containing the text 'P-3'
-#   p2_column -    cost table header cell containing the text 'P-2'
-#   p1_column -    cost table header cell containing the text 'P-1'
-#   sp3_column -   cost table header cell containing the text 'SP-3'
-#   sp1_column -   cost table header cell containing the text 'SP-1'
-#   temp_column -  cost table header cell containing the text 'Temp'
-#   total_column - cost table header cell containing the text 'Total'
-#   direct_salary_column - cost table header cell containg the string
-#                          'Salary' (2nd line of 'Direct Salary')
-#   overhead_column - cost table header cell containing the overhead
-#                     rate (as a string); used when we want to access the column
-#   overhead_cell -   ditto; used when we want to access the cell itself
 #   total_cost_column - cost table header cell containing the text
 #                       'Cost' (2nd line of 'Total Cost'
+#   temp_column -  cost table header cell containing the text 'Temp'
+#   total_column - cost table header cell containing the text 'Total'
 #   total_line - any cell in row containing person-hour totals in 
 #                the cost table; only the row index of this cell is used
-#   odc_travel_line - any cell on line containing Other Direct Costs: travel;
-#                     only the row index of this cell is used
-#   odc_office_equipment_line - any cell on line containing Other Direct Costs:
-#                               general office equipment; only the row index of 
-#                               this cell is used
-#   odc_dp_equipment_line - any cell on line containing Other Direct Costs:
-#                           data processing equipment; only the row index of 
-#                           this cell is used
-#   odc_consultants_line - any cell on line containing Other Direct Costs:
-#                          consultants; only the row index of this cell is used
-#   odc_printing_line - any cell on line containing Other Direct Costs:
-#                       printing; only the row index of this cell is used
-#   odc_other_line - any cell on line containing Ohter Direct Costs: other;
-#                    only the row index of this cell is used
-#   first_schedule_column - any cell in first column of the schedule exhibit
-#                           that may contain real schedule data; only the
-#                           column index of this cell is used
-#   last_schedule_column - any cell in the column that is one column beyond
-#                          the last 'real' column in the schedule table;
-#                          only the column index of this cell is used
-#   sched_major_units_cell - cell containing the 'major units' (which may be
-#                       Quarters, Months, or Weeks) used to express the schedule
 #
 # Internals of this Module: Top-level Functions
 # =============================================
