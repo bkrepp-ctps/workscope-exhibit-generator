@@ -337,141 +337,141 @@ def initExcelFile(fullpath):
         retval['project_name_cell_row_ix'] = get_row_index(wb, 'project_name_cell')
         retval['project_name_cell_col_ix'] = get_column_index(wb, 'project_name_cell')
     except:
-        retval['errors'] += 'Failed to find project_name_cell_row_ix and/or project_name_cell_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: project_name_cell.\n'
     try:
         retval['direct_salary_cell_row_ix'] = get_row_index(wb, 'direct_salary_cell')
         retval['direct_salary_cell_col_ix'] = get_column_index(wb, 'direct_salary_cell')
     except:
-        retval['errors'] += 'Failed to find direct_salary_cell_row_ix and/or direct_salary_cell_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: direct_salary_cell.\n'
     try:
         retval['odc_cell_row_ix'] = get_row_index(wb, 'odc_cell')
         retval['odc_cell_col_ix'] = get_column_index(wb, 'odc_cell')
     except:
-        retval['errors'] += 'Failed to find odc_cell_row_ix and/or odc_cell_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: odc_cell.\n'
     try:
         retval['total_cost_cell_row_ix'] = get_row_index(wb, 'total_cost_cell')
         retval['total_cost_cell_col_ix'] = get_column_index(wb, 'total_cost_cell')
     except:
-        retval['errors'] += 'Failed to find total_cost_cell_row_ix and/or total_cost_cell_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: total_cost_cell.\n'
     # Overhead rate cell.
     try:
         retval['overhead_cell_row_ix'] = get_row_index(wb, 'overhead_cell')
         retval['overhead_cell_col_ix'] = get_column_index(wb, 'overhead_cell')
     except:
-        retval['errors'] += ' Failed to find overhead_cell_row_ix and/or overhead_cell_col_ix\n'
+        retval['errors'] += ' Failed to find defined name: overhead_cell.\n'
     #       
     # Collect useful row indices for Exhibit 2
     #
     try:
         retval['task_list_top_row_ix'] = get_row_index(wb, 'task_list_top')
     except:
-        retval['errors'] += 'Failed to find task_list_top_row_ix\n'
+        retval['errors'] += 'Failed to find defined name: task_list_top.\n'
     try:
         retval['task_list_bottom_row_ix'] = get_row_index(wb, 'task_list_bottom')
     except:
-        retval['errors'] += 'Failed to find task_list_bottom_row_ix\n'
+        retval['errors'] += 'Failed to find defined name: task_list_bottom.\n'
     try:
         retval['total_line_row_ix'] = get_row_index(wb, 'total_line')   
     except:
-        retval['errors'] += 'Failed to find total_line_row_ix\n'
+        retval['errors'] += 'Failed to find defined name: total_line.\n'
     # Rows containing other direct costs
     try:
         retval['odc_travel_line_ix'] =  get_row_index(wb, 'odc_travel_line')
     except:
-        retval['errors'] += 'Failed to find odc_travel_line_ix\n'
+        retval['errors'] += 'Failed to find defined name: odc_travel_line.\n'
     try:
         retval['odc_office_equipment_line_ix'] = get_row_index(wb, 'odc_office_equipment_line')
     except:
-        retval['errors'] += 'Failed to find odc_office_equipment_line_ix\n'
+        retval['errors'] += 'Failed to find odc_office_equipment_line.\n'
     try:
         retval['odc_dp_equipment_line_ix'] = get_row_index(wb, 'odc_dp_equipment_line')
     except:
-        retval['errors'] = 'Failed to find odc_dp_equipment_line_ix\n'
+        retval['errors'] = 'Failed to find defined name: odc_dp_equipment_line.\n'
     try:
         retval['odc_consultants_line_ix'] = get_row_index(wb, 'odc_consultants_line')
     except:
-        retval['errors'] += 'Failed to find odc_consultants_line_ix\n'
+        retval['errors'] += 'Failed to find defined name: odc_consultants_line.\n'
     try:
         retval['odc_printing_line_ix'] = get_row_index(wb, 'odc_printing_line')
     except:
-        retval['errors'] += 'odc_printing_line_ix\n'
+        retval['errors'] += 'Failed to find defined name:  odc_printing_line.\n'
     try:
         retval['odc_other_line_ix'] = get_row_index(wb, 'odc_other_line')   
     except:
-        retval['errors'] += 'Failed to find odc_other_line_ix\n'
+        retval['errors'] += 'Failed to find defined name:  odc_other_line.\n'
     # Rows containing info on funding source(s)
     try:
         retval['funding_list_top_row_ix'] = get_row_index(wb, 'funding_list_top')
     except:
-        retval['errors'] += 'Failed to find funding_list_top_row_ix\n'
+        retval['errors'] += 'Failed to find defined name: funding_list_top.\n'
     try:
         retval['funding_list_bottom_row_ix'] = get_row_index(wb, 'funding_list_bottom')
     except:
-        retval['errors'] += 'Failed to find funding_list_bottom_row_ix\n'
+        retval['errors'] += 'Failed to find defined name: funding_list_bottom.\n'
     #
     # Collect useful column indices for Exhibit 2
     #
     try:
         retval['task_number_col_ix'] = get_column_index(wb, 'task_number_column')
     except:
-        retval['errors'] += 'Failed to find task_number_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: task_number_column.\n'
     try:
         retval['task_name_col_ix'] = get_column_index(wb, 'task_name_column')
     except:
-        retval['errors'] += 'Failed to find task_name_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: task_name_column.\n'
     try:
         retval['m1_col_ix'] = get_column_index(wb, 'm1_column')
     except:
-        retval['errors'] += 'Failed to find m1_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: m1_column.\n'
     try:
         retval['p5_col_ix'] = get_column_index(wb, 'p5_column')
     except:
-        retval['errors'] += 'Failed to find p5_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: p5_column.\n'
     try:    
         retval['p4_col_ix'] = get_column_index(wb, 'p4_column')
     except:
-        retval['errors'] += 'Failed to find p4_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: p4_column.\n'
     try:
         retval['p3_col_ix'] = get_column_index(wb, 'p3_column')
     except:
-        retval['errors'] += 'Failed to find p3_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: p3_column.\n'
     try:
         retval['p2_col_ix'] = get_column_index(wb, 'p2_column')
     except:
-        retval['errors'] += 'Failed to find p2_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: p2_column.\n'
     try:
         retval['p1_col_ix'] = get_column_index(wb, 'p1_column')
     except:
-        retval['errors'] += 'Failed to find p1_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: p1_column.\n'
     try:
         retval['sp3_col_ix'] = get_column_index(wb, 'sp3_column')
     except:
-        retval['errors'] += 'Failed to find sp3_col_ix\n'
+        retval['errors'] += 'Failed to find defined name:  sp3_column.\n'
     try:
         retval['sp1_col_ix'] = get_column_index(wb, 'sp1_column')
     except:
-        retval['errors'] += 'Failed to find sp1_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: sp1_column.\n'
     try:
         retval['temp_col_ix'] = get_column_index(wb, 'temp_column')
     except:
-        retval['errors'] += 'Failed to find temp_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: temp_column.\n'
     # The following statement refers to the column for total labor cost before overhead
     try:
         retval['total_col_ix'] = get_column_index(wb, 'total_column')
     except:
-        retval['errors'] += 'Failed to find total_col_ix\n'
+        retval['errors'] += 'Failed to find defined_name: total_column.\n'
     try:
         retval['direct_salary_col_ix'] = get_column_index(wb, 'direct_salary_column')
     except:
-        retval['errors'] += 'Failed to find direct_salary_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: direct_salary_column.\n'
     try:
         retval['overhead_col_ix'] = get_column_index(wb, 'overhead_column')
     except:
-        retval['errors'] += 'Failed to find total_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: overhead_column.\n'
     try:
         retval['total_cost_col_ix'] = get_column_index(wb, 'total_cost_column')
     except:
-        retval['errors'] += 'Failed to find total_cost_col_ix\n'
+        retval['errors'] += 'Failed to find defined_name: total_cost_column.\n'
     #
     # C'est un petit hacque: The column index for funding source names is the same as that for task names.
     #
@@ -482,23 +482,23 @@ def initExcelFile(fullpath):
     try:
         retval['first_schedule_col_ix'] = get_column_index(wb, 'first_schedule_column')
     except:
-        retval['errors'] += 'Failed to find first_schedule_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: first_schedule_column.\n'
     try:
         retval['last_schedule_col_ix'] = get_column_index(wb, 'last_schedule_column')
     except:
-        retval['errors'] += 'Failed to find last_schedule_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: last_schedule_column.\n'
     try:
         retval['milestone_label_col_ix'] = get_column_index(wb, 'milestone_label_column')
     except:
-        retval['errors'] += 'Failed to find milestone_label_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: milestone_label_column.\n'
     try:
         retval['milestone_name_col_ix'] = get_column_index(wb, 'milestone_name_column')
     except:
-        retval['errors'] += 'Failed to find milestone_name_col_ix\n'
+        retval['errors'] += 'Failed to find defined name: milestone_name_column.\n'
     try:
         retval['milestones_list_first_row_ix'] = get_row_index(wb, 'milestones_list_first_row')
     except:
-        retval['errors'] += 'Failed to find milestones_list_first_row_ix\n'
+        retval['errors'] += 'Failed to find defined name: milestones_list_first_row.\n'
     # N.B. The last row of the milestones list is found programmatically by crawling down
     #      milestone_label_column until the first row containing a blank cell is found.
     
@@ -521,7 +521,7 @@ def initExcelFile(fullpath):
         retval['sched_minor_units'] = min_units
         retval['num_sched_subdivisions'] = num_subdivisions
     except:
-        retval['errors'] += 'Failed to find sched_major_units_cell\n'
+        retval['errors'] += 'Failed to find defined name: sched_major_units_cell.\n'
     #
     # N.B. The slightly incomplete 'retval' is now passed to get_last_used_sched_column
     last_used_schedule_col_ix = get_last_used_sched_column(retval)

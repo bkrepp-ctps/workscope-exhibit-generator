@@ -1,0 +1,5 @@
+.pyc
+excelFileManager.pyc
+*.pyc
+*.py~
+*.py_backup
